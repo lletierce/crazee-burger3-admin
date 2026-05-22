@@ -2,6 +2,11 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router';
 import { login } from './login-api';
 
+import { FcGoogle } from "react-icons/fc";
+import { FaApple, FaFacebook } from 'react-icons/fa';
+import { FaSquareXTwitter } from 'react-icons/fa6';
+import IconWrapper from '../../../shared/ui/IconWrapper';
+
 
 export default function LoginForm() {
     const navigate = useNavigate();
@@ -30,10 +35,10 @@ export default function LoginForm() {
     return (
         <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
             <div className="flex justify-center gap-6 md:gap-10 px-6 py-4"> {/*bg-white dark:bg-gray-100 shadow-lg rounded-2xl*/}
-                {/* <IconWrapper icon={<FcGoogle />} />
+                <IconWrapper icon={<FcGoogle />} />
                 <IconWrapper icon={<FaApple />} color="text-black" />
                 <IconWrapper icon={<FaFacebook />} color="text-blue-600" />
-                <IconWrapper icon={<FaSquareXTwitter />} color="text-black" /> */}
+                <IconWrapper icon={<FaSquareXTwitter />} color="text-black" />
             </div>
             <hr />
             {error && <p className="text-red-600">{error}</p>}
