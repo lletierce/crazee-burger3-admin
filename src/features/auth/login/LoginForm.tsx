@@ -1,35 +1,28 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router';
-import { login } from './login-api';
+import { login } from './api-login';
 
 import { FcGoogle } from "react-icons/fc";
 import { FaApple, FaFacebook } from 'react-icons/fa';
 import { FaSquareXTwitter } from 'react-icons/fa6';
 import IconWrapper from '../../../shared/ui/IconWrapper';
+import { useLogin } from './use-login';
 
 
 export default function LoginForm() {
-    const navigate = useNavigate();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
 
-    const handleRecover = () => { 
-        navigate("/recovery")
-     }
-
+    const {
+        handleLogin,
+        error,
+        loading
+    } = useLogin();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        try {
-            await login(email, password);
-            setError('');
-            navigate('/debug'); // redirection - link mail : http://localhost:5173/reset-password
-        } catch (err: any) {
-            // setError(err.message);
-            setError("LOGIN_FAILURE_MESSAGE");
-        }
+        await handleLogin(email, password);
     };
 
     return (
@@ -65,7 +58,7 @@ export default function LoginForm() {
                 type="submit">
                 Connexion
             </button>
-                <p className="w-fit cursor-pointer text-sm md:hover:underline text-[#f56a2c]" onClick={() => handleRecover()}>Vous avez oublié votre mot de passe ?</p>
+                <p className="w-fit cursor-pointer text-sm md:hover:underline text-[#f56a2c]">Vous avez oublié votre mot de passe ?</p>
             {/* <p className="text-gray-500 text-xs  flex justify-center">Plus d'options de connexion</p> */}
         </form>
     );
