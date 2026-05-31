@@ -10,6 +10,6 @@ export default function LoadingFull() {
 
 export function Spinner() {
   return (
-    <div className="w-10 h-10 border-4 border-[#ffa01b] border-t-transparent rounded-full animate-spin" />
+    <div className="w-10 h-10 border-4 border-orange-primary border-t-transparent rounded-full animate-spin" />
   );
 }
