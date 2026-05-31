@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router"
 import { logout } from "../../features/auth/logout"
+import LoadingFull from "../../shared/ui/loader/LoadingFull"
 
 export default function DebugPage() {
 
@@ -8,12 +9,12 @@ export default function DebugPage() {
   const handleLogout = async () => {
     await logout()
     navigate('/login')
-    console.log('success - logout')
   }
 
   return (
-    <div>Debug
+    <>
+      <LoadingFull />
       <button onClick={handleLogout}>Logout</button>
-    </div>
+    </>
   )
 }

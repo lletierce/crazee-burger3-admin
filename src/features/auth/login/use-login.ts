@@ -17,8 +17,7 @@ export function useLogin() {
         try {
             await login(email, password);
             setError('');
-            navigate('/debug');
-            console.log('success - login')
+            navigate('/produits');
         } catch (err) {
 
             setError('LOGIN_FAILURE_MESSAGE');
