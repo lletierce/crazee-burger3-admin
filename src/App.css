@@ -1,7 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Open+Sans:wght@500&display=swap");
 @import "tailwindcss";
 
+
+/*  Couleurs et polices personnalisées */
 @theme {
   --color-orange-primary: #ffa01b;
+  --color-red-primary: #e25549;
+  --color-green-success: #60bd4f;
   --font-amatic: "Amatic SC", "cursive";
 }
+
+/* ff9f1b */
