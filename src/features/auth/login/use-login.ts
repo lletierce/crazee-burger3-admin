@@ -28,8 +28,13 @@ export function useLogin() {
         }
     };
 
+    const moveToRecovery     = () => {
+        navigate('/recovery');
+    }
+
     return {
         handleLogin,
+        moveToRecovery,
         error,
         loading
     };

@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router';
-import { login } from './api-login';
 
 import { FcGoogle } from "react-icons/fc";
 import { FaApple, FaFacebook } from 'react-icons/fa';
@@ -16,6 +14,7 @@ export default function LoginForm() {
 
     const {
         handleLogin,
+        moveToRecovery,
         error,
         loading
     } = useLogin();
@@ -58,7 +57,9 @@ export default function LoginForm() {
                 type="submit">
                 Connexion
             </button>
-                <p className="w-fit cursor-pointer text-sm md:hover:underline text-[#f56a2c]">Vous avez oublié votre mot de passe ?</p>
+                <p className="w-fit cursor-pointer text-sm md:hover:underline text-[#f56a2c]" onClick={moveToRecovery}>
+                    Vous avez oublié votre mot de passe ?
+                </p>
             {/* <p className="text-gray-500 text-xs  flex justify-center">Plus d'options de connexion</p> */}
         </form>
     );
