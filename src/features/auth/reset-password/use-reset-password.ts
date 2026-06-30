@@ -1,39 +1,35 @@
 import { useState } from "react";
 import { confirmReset } from "./api-reset-password";
+import { FirebaseError } from "firebase/app";
+
+export type Status = "idle" | "loading" | "success" | "error" | "invalid";
 
 export function useResetPassword() {
+  const [status, setStatus] = useState<Status>("idle");
+  const [error, setError] = useState<string | null>(null);
 
-    const STATUS = {
-        IDLE: 'default',
-        SUCCESS: 'success',
-        ERROR: 'error',
-        INVALID: 'invalid',
-    } as const;
-    type QueryStatus = (typeof STATUS)[keyof typeof STATUS];
+  const handleResetPassword = async (oobCode: string, password: string) => {
+    setStatus("loading");
+    setError(null);
 
-    const [status, setStatus] = useState<QueryStatus>(STATUS.IDLE);
-
-    const handleResetPassword = async (oobCode: string, password: string) => {
-        
-        if (!oobCode) return;
-
-        try {
-            await confirmReset(oobCode, password);
-            setStatus(STATUS.SUCCESS);
+    try {
+      await confirmReset(oobCode, password);
+      setStatus("success");
+    } catch (err) {
+      if (err instanceof FirebaseError) {
+        if (
+          err.code === "auth/expired-action-code" ||
+          err.code === "auth/invalid-action-code"
+        ) {
+          setStatus("invalid");
+          setError("Ce lien est invalide ou a expiré.");
+          return;
         }
-        catch (error) {
-            setStatus(STATUS.ERROR);
-        }
+      }
+      setStatus("error");
+      setError("Une erreur est survenue, veuillez réessayer.");
     }
+  };
 
-
-    const reset = () => {
-        setStatus(STATUS.IDLE);
-    };
-
-    return {
-        status,
-        handleResetPassword,
-        reset,
-    };
+  return { status, error, handleResetPassword };
 }

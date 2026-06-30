@@ -1,21 +1,31 @@
-export const config = {
-    default: {
-        title: 'Changement du mot de passe',
-        logo: 'default',
-    },
+import type { Status } from "./use-reset-password";
 
-    success: {
-        title: 'Mot de passe modifié avec succès',
-        logo: 'success',
-    },
+type LogoVariant = "default" | "success" | "error";
 
-    error: {
-        title: 'Erreur rencontrée',
-        logo: 'error',
-    },
+type StatusConfig = {
+  title: string;
+  logo: LogoVariant;
+};
 
-    invalid: {
-        title: 'Lien de réinitialisation invalide',
-        logo: 'error',
-    },
-} as const;
+export const config: Record<Status, StatusConfig> = {
+  idle: {
+    title: "Changement du mot de passe",
+    logo: "default",
+  },
+  loading: {
+    title: "Traitement en cours",
+    logo: "default",
+  },
+  success: {
+    title: "Mot de passe modifié avec succès",
+    logo: "success",
+  },
+  error: {
+    title: "Erreur rencontrée",
+    logo: "error",
+  },
+  invalid: {
+    title: "Lien de réinitialisation invalide",
+    logo: "error",
+  },
+};
