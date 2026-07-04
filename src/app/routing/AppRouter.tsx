@@ -25,11 +25,13 @@ export default function AppRouter() {
 
         <Route path="/debug" element={<DebugPage />} />
 
+        <Route path="/produits" element={<ProductsPage />} />
+
 
         {/* Routes privées */}
-        <Route element={<ProtectedRoute />}>
+        {/* <Route element={<ProtectedRoute />}>
           <Route path="/produits" element={<ProductsPage />} />
-        </Route>
+        </Route> */}
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
