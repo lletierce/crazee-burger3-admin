@@ -1,0 +1,131 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { fetchProductsPage, type ProductsPageCursor } from '../api/products.api';
+import type { Product, ProductCategory, ProductSortField, SortOrder } from '../types/product.types';
+
+interface UseProductsOptions {
+  pageSize?: number;
+}
+
+interface UseProductsResult {
+  products: Product[];
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  hasMore: boolean;
+  error: Error | null;
+  loadMore: () => void;
+
+  category: ProductCategory | null;
+  setCategory: (category: ProductCategory | null) => void;
+  sortField: ProductSortField;
+  setSortField: (field: ProductSortField) => void;
+  sortOrder: SortOrder;
+  setSortOrder: (order: SortOrder) => void;
+}
+
+/**
+ * Deliberate choice: this hook owns the filter/sort STATE, not just the
+ * data-fetching. It would be tempting to let a parent component (or the
+ * toolbar itself) hold `category`/`sortField`/`sortOrder` and just pass
+ * them in as arguments. The problem: changing the category has to reset
+ * the accumulated product list AND the pagination cursor AND refetch page
+ * one — three things that must happen together, atomically. If that
+ * state lived outside this hook, keeping it in sync would need an extra
+ * `useEffect` watching props from the outside, which is exactly the kind
+ * of "two sources of truth that can drift apart" this hook exists to
+ * avoid. Search is intentionally NOT here — it filters products already
+ * in memory, so it doesn't need to touch the network or reset pagination;
+ * it belongs in the component that renders the list, not in this hook.
+ */
+export function useProducts({ pageSize = 20 }: UseProductsOptions = {}): UseProductsResult {
+  const [category, setCategory] = useState<ProductCategory | null>(null);
+  const [sortField, setSortField] = useState<ProductSortField>('createdAt');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [cursor, setCursor] = useState<ProductsPageCursor>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  /**
+   * The race condition this guards against: the Firestore web SDK's
+   * `getDocs` doesn't accept an `AbortSignal` the way `fetch` does, so we
+   * can't truly cancel an in-flight request. Without this guard, a
+   * sequence like "switch category to Burger, then immediately switch to
+   * Boisson" could resolve out of order — if the first (now-stale)
+   * request happens to finish after the second, its response would
+   * silently overwrite the correct one on screen.
+   *
+   * The fix: every fetch stamps itself with the current value of this
+   * ref before starting, and only applies its result if that value
+   * hasn't changed by the time it resolves. One counter covers every
+   * source of a new request (filter change, sort change, AND loadMore),
+   * because every one of them increments it.
+   */
+  const requestIdRef = useRef(0);
+
+  // Reset + refetch page one whenever the filter or sort changes.
+  useEffect(() => {
+    const requestId = ++requestIdRef.current;
+    setIsLoading(true);
+    setError(null);
+
+    fetchProductsPage({ category: category ?? undefined, sortField, sortOrder, pageSize })
+      .then(({ products: page, nextCursor, hasMore: more }) => {
+        if (requestId !== requestIdRef.current) return; // superseded — ignore
+        setProducts(page);
+        setCursor(nextCursor);
+        setHasMore(more);
+      })
+      .catch((err: unknown) => {
+        if (requestId !== requestIdRef.current) return;
+        setError(err instanceof Error ? err : new Error('Impossible de charger les produits.'));
+      })
+      .finally(() => {
+        if (requestId !== requestIdRef.current) return;
+        setIsLoading(false);
+      });
+  }, [category, sortField, sortOrder, pageSize]);
+
+  const loadMore = useCallback(() => {
+    // Guards against a double click firing two overlapping requests, and
+    // against clicking "voir plus" while the initial page is still loading.
+    if (isLoading || isLoadingMore || !hasMore) return;
+
+    const requestId = ++requestIdRef.current;
+    setIsLoadingMore(true);
+    setError(null);
+
+    fetchProductsPage({ category: category ?? undefined, sortField, sortOrder, cursor, pageSize })
+      .then(({ products: page, nextCursor, hasMore: more }) => {
+        if (requestId !== requestIdRef.current) return;
+        setProducts((current) => [...current, ...page]);
+        setCursor(nextCursor);
+        setHasMore(more);
+      })
+      .catch((err: unknown) => {
+        if (requestId !== requestIdRef.current) return;
+        setError(err instanceof Error ? err : new Error('Impossible de charger la suite.'));
+      })
+      .finally(() => {
+        if (requestId !== requestIdRef.current) return;
+        setIsLoadingMore(false);
+      });
+  }, [category, sortField, sortOrder, cursor, hasMore, isLoading, isLoadingMore, pageSize]);
+
+  return {
+    products,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    error,
+    loadMore,
+    category,
+    setCategory,
+    sortField,
+    setSortField,
+    sortOrder,
+    setSortOrder,
+  };
+}

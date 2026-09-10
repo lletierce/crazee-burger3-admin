@@ -1,8 +1,39 @@
 import { useNavigate } from "react-router"
+import MainLayout from "../../shared/ui/layouts/MainLayout";
 import { logout } from "../../features/auth/logout"
-import MainLayout from "../../shared/ui/layouts/MainLayout"
+import { ProductsGrid } from "../../features/products/components/ProductsGrid";
+import { useProducts } from "../../features/products/hooks/useProducts";
+import { CategoryFilter } from "../../features/products/components/Toolbar/CategoryFilter";
+import { ProductsGridSkeleton } from "../../features/products/components/ProductsGridSkeleton";
+import { SortMenu } from "../../features/products/components/Toolbar/SortMenu";
+import { SortOrderToggle } from "../../features/products/components/Toolbar/SortOrderToggle";
+import { useState } from "react";
+import { useFilteredProducts } from "../../features/products/hooks/useFilteredProducts";
+import { SearchInput } from "../../features/products/components/Toolbar/SearchInput";
+import { AddProductButton } from "../../features/products/components/Toolbar/AddProductButton";
 
 export default function ProductsPage() {
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // TODO: remplacer par l'ouverture réelle du formulaire/modal d'ajout,
+  // à construire dans la prochaine étape. Pour l'instant, ce state prouve
+  // juste que le bouton déclenche bien quelque chose.
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+
+  const {
+    products, category, setCategory,
+    sortField, setSortField, sortOrder, setSortOrder,
+    isLoading, error, hasMore, isLoadingMore, loadMore,
+  } = useProducts();
+
+  const filteredProducts = useFilteredProducts(products, searchTerm);
+  const emptyMessage = searchTerm
+    ? hasMore
+      ? `Aucun produit chargé ne correspond à "${searchTerm}" — clique sur "voir plus" pour en charger davantage.`
+      : `Aucun produit ne correspond à "${searchTerm}".`
+    : undefined;
+
   const navigate = useNavigate()
 
   const handleLogout = async () => {
@@ -13,57 +44,48 @@ export default function ProductsPage() {
 
 
   return (
-    <MainLayout  userDisplayName="John Doe" onLogout={handleLogout}>
-        <div className="md:h-[90vh] md:shadow-[inset_0_8px_20px_8px_rgba(0,0,0,0.2)]">
-          <h1>ProductsPage</h1>
+    <MainLayout userDisplayName="Loris LETIERCE" onLogout={handleLogout}>
+      <div className="md:h-[90vh] md:overflow-y-auto md:shadow-[inset_0_8px_20px_8px_rgba(0,0,0,0.2)]">
+        {/* La barre d'outils n'est plus derrière un `if` — elle est toujours là */}
+        <div className="sticky top-0 z-10 border-b border-neutral-200 bg-white p-4 md:p-6 md:pb-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <CategoryFilter value={category} onChange={setCategory} />
+            <SortMenu value={sortField} onChange={setSortField} />
+            <SortOrderToggle value={sortOrder} onChange={setSortOrder} />
+            <SearchInput value={searchTerm} onChange={setSearchTerm} />
+            <AddProductButton onClick={() => {setIsAddProductOpen(true), console.log(isAddProductOpen)}} />
+          </div>
         </div>
+
+        <div className="p-4 md:p-6 md:pt-0">
+          {/* Seule cette zone change de contenu selon l'état */}
+          {isLoading ? (
+            <ProductsGridSkeleton />
+          ) : error ? (
+            <p className="py-12 text-center text-sm text-red-600">{error.message}</p>
+          ) : (
+            <>
+              <ProductsGrid
+                products={filteredProducts}
+                emptyMessage={emptyMessage}
+              />
+
+              {hasMore && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={loadMore}
+                    disabled={isLoadingMore}
+                    className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50 disabled:opacity-50"
+                  >
+                    {isLoadingMore ? 'Chargement...' : 'Voir plus'}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
     </MainLayout>
   )
 }
-
-
-/*
-<div className="
-      h-screen 
-      flex 
-      justify-center
-      bg-[#f5f5f7] 
-      items-center
-      md:bg-[linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url('/images/burger-and-fries-background.jpg')]
-      bg-cover 
-      bg-center
-    ">
-      <div className="
-        flex 
-        flex-col 
-        h-full 
-        w-full 
-        bg-gray-600 
-        md:h-[95vh] 
-        md:max-w-350 
-        md:mx-auto
-        md:rounded-2xl
-      ">
-        <div className="
-        bg-[#f5f5f7]
-          md:rounded-t-2xl
-        ">
-          <h4>Navbar</h4>
-          <button onClick={handleLogout} className="cursor-pointer hover:text-">
-            logout
-          </button>
-        </div>
-        <div className="
-          flex-1 
-          relative 
-          bg-[#f5f5f7] 
-          pt-[8vh]
-          shadow-[inset_0_8px_20px_8px_rgba(0,0,0,0.2)]
-          md:pt-0 
-          md:rounded-b-2xl
-        ">
-          <h1>ProductsPage</h1>
-        </div>
-      </div>
-    </div>
- */

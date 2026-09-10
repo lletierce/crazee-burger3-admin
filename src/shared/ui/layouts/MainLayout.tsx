@@ -10,9 +10,10 @@ export default function MainLayout({ children, ...navbarProps }: MainLayoutProps
         <div className="
             min-h-screen 
             bg-neutral-50
-            md:flex 
+            md:flex
             md:items-center 
-            md:justify-center 
+            md:justify-center
+            md:overflow-y-auto
             md:p-6
             md:bg-[linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url('/images/burger-and-fries-background.jpg')]
             md:bg-cover 
