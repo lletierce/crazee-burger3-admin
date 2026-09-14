@@ -20,6 +20,7 @@ interface UseProductsResult {
   setSortField: (field: ProductSortField) => void;
   sortOrder: SortOrder;
   setSortOrder: (order: SortOrder) => void;
+  refetch: () => void;
 }
 
 /**
@@ -65,13 +66,21 @@ export function useProducts({ pageSize = 20 }: UseProductsOptions = {}): UseProd
    */
   const requestIdRef = useRef(0);
 
-  // Reset + refetch page one whenever the filter or sort changes.
-  useEffect(() => {
+  /**
+   * Extracted into its own `useCallback`, not left inline inside the
+   * `useEffect`, because it now has TWO callers: the effect (runs
+   * automatically when filter/sort change) and `refetch` (called
+   * manually — right now, only after a successful product creation, so
+   * the new product shows up without the user reloading the page). Same
+   * function either way — "load page one under the current filter/sort"
+   * doesn't change meaning depending on who asked for it.
+   */
+  const fetchFirstPage = useCallback(() => {
     const requestId = ++requestIdRef.current;
     setIsLoading(true);
     setError(null);
 
-    fetchProductsPage({ category: category ?? undefined, sortField, sortOrder, pageSize })
+    return fetchProductsPage({ category: category ?? undefined, sortField, sortOrder, pageSize })
       .then(({ products: page, nextCursor, hasMore: more }) => {
         if (requestId !== requestIdRef.current) return; // superseded — ignore
         setProducts(page);
@@ -87,6 +96,11 @@ export function useProducts({ pageSize = 20 }: UseProductsOptions = {}): UseProd
         setIsLoading(false);
       });
   }, [category, sortField, sortOrder, pageSize]);
+
+  // Reset + refetch page one whenever the filter or sort changes.
+  useEffect(() => {
+    fetchFirstPage();
+  }, [fetchFirstPage]);
 
   const loadMore = useCallback(() => {
     // Guards against a double click firing two overlapping requests, and
@@ -127,5 +141,6 @@ export function useProducts({ pageSize = 20 }: UseProductsOptions = {}): UseProd
     setSortField,
     sortOrder,
     setSortOrder,
+    refetch: fetchFirstPage,
   };
 }

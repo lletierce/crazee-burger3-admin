@@ -26,29 +26,29 @@ function isTimestampLike(value: unknown): value is TimestampLike {
   );
 }
 
-/**
- * Turns a raw Firestore value into a `Date`, safely.
- *
- * IMPORTANT: this deliberately checks "does this object have a
- * `toDate()` method" (structural / duck typing) rather than
- * `value instanceof Timestamp`. `instanceof` compares against one
- * SPECIFIC class reference — if the project ends up with two copies of
- * the Firebase SDK in `node_modules` (a "dual package hazard": a
- * transitive dependency pulling its own `firebase` version, a version
- * mismatch, a monorepo symlink...), there end up being two distinct
- * `Timestamp` classes in memory. The object Firestore actually hands
- * back was built by "the other one", so `instanceof` silently returns
- * `false` even though the object is a perfectly valid, real Timestamp
- * with a working `.toDate()`. This is exactly the failure mode where
- * every single document fails the same way, even ones you've verified
- * are correctly typed in the Firestore console — the data was never the
- * problem, the identity check was.
- *
- * `console.warn` still fires for genuinely missing/invalid data (e.g. a
- * document where the field is truly absent, or holds a string instead
- * of a timestamp), so this stays a real safety net — it just no longer
- * false-positives on a module-duplication issue.
- */
+/** 
+* Convertit de manière sécurisée une valeur Firestore brute en `Date`.
+* IMPORTANT : cette fonction vérifie volontairement si l'objet possède une * méthode `toDate()` (approche structurelle, ou « duck typing ») 
+* plutôt que  d'utiliser `value instanceof Timestamp` 
+* `instanceof` compare un objet à une référence de classe BIEN PRÉCISE. 
+*
+* Si le projet finit par contenir deux copies différentes du SDK Firebase 
+* dans `node_modules` (par exemple à cause d'une dépendance transitive qui 
+* embarque sa propre version de `firebase`, d'un conflit de versions ou 
+* d'un lien symbolique dans un monorepo), deux classes `Timestamp` distinctes 
+* peuvent alors exister en mémoire.
+* 
+* L'objet renvoyé par Firestore peut avoir été créé par « l'autre » instance de `Timestamp`. 
+* Dans ce cas, `instanceof` retourne silencieusement `false`,
+* alors que l'objet est bien un Timestamp valide et possède une méthode `.toDate()` fonctionnelle.
+* C'est précisément le type de problème qui peut provoquer l'échec de tous les documents de la même manière, 
+* y compris ceux dont les données ont été vérifiées comme correctement typées dans la console Firestore.
+* Le problème ne vient alors pas des données Firestore, mais de la vérification d'identité effectuée par `instanceof`.
+* `console.warn` continue néanmoins d'être déclenché lorsque les données sont réellement absentes 
+* ou invalides (par exemple lorsqu'un champ est absent * du document ou contient une chaîne de caractères à la place d'un Timestamp).
+* On conserve donc une véritable sécurité tout en évitant les faux positifs 
+* liés à la duplication du module Firebase. 
+*/
 function toDateSafe(value: unknown, fieldName: string, docId: string): Date {
   if (isTimestampLike(value)) {
     return value.toDate();
@@ -61,35 +61,51 @@ function toDateSafe(value: unknown, fieldName: string, docId: string): Date {
 }
 
 /**
- * The bridge between "what Firestore stores" and "what the app works
- * with" (the `Product` type). Every read and every write to the
- * `products` collection goes through this — it's attached to the
- * collection reference with `.withConverter(productConverter)`, so the
- * rest of the codebase never sees a raw Firestore document.
- */
+* Fait le lien entre les données stockées dans Firestore et les objets * utilisés par l'application (le type `Product`). 
+* Toutes les lectures et écritures de la collection `products` passent par ce converter. 
+* Il est associé à la référence de la collection via * `.withConverter(productConverter)`, ce qui permet au reste du code 
+* de l'application de ne jamais manipuler directement les documents * Firestore bruts. 
+*/
 export const productConverter: FirestoreDataConverter<Product> = {
-  /**
-   * Product -> Firestore document data (writes).
-   *
-   * `id` is stripped before writing: it comes from `snapshot.id` (the
-   * document's own address), not from a field inside it. Writing it
-   * again would duplicate that information.
-   */
+  /** 
+   * Product -> données du document Firestore (écriture).
+   *  `id` est retiré avant l'écriture : il provient de `snapshot.id`, c'est-à-dire
+   * de l'identifiant propre au document Firestore, et non d'un champ stocké dans le document.
+   * L'enregistrer également comme champ du document ferait donc doublon. *
+   * toFirestore( // product: WithFieldValue<Product> | PartialWithFieldValue<Product>, // _options?: SetOptions, // ): DocumentData { // const { id, ...data } = product as WithFieldValue<Product>; 
+   *  // return data; //},
+  */
   toFirestore(
     product: WithFieldValue<Product> | PartialWithFieldValue<Product>,
     _options?: SetOptions,
   ): DocumentData {
     const { id, ...data } = product as WithFieldValue<Product>;
-    return data;
+    // Firestore refuse les valeurs `undefined` pour les champs : une propriété 
+    // doit contenir une vraie valeur, `null`, ou être complètement absente. 
+    //
+    // // Les champs optionnels de `Product` (`imageUrl` aujourd'hui, et potentiellement 
+    // d'autres à l'avenir) peuvent légitimement être `undefined` en mémoire lorsque
+    // le formulaire est laissé vide.
+    // 
+    // Supprimer ces propriétés ici, de manière centralisée, permet de protéger
+    // toutes les écritures effectuées via ce converter : aussi bien la création
+    // actuelle que les futurs formulaires de modification.
+    // 
+    // Les différents appelants n'ont donc pas besoin de penser eux-mêmes à 
+    // supprimer les champs optionnels vides.
+    return Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined));
   },
 
-  /**
-   * Firestore document -> Product (reads).
-   *
-   * Rebuilt field by field (not spread + cast) so a renamed/missing
-   * field is caught by TypeScript here, and `createdAt`/`lastUpdated`
-   * go through `toDateSafe` instead of a blind assertion.
-   */
+  /** 
+  * Document Firestore -> Product (lecture).
+  * 
+  * L'objet est reconstruit champ par champ plutôt que via un spread suivi
+  * d'un cast de type. Ainsi, un champ renommé ou manquant peut être détecté
+  * par TypeScript directement ici. 
+  * 
+  * `createdAt` et `lastUpdated` passent également par `toDateSafe` plutôt 
+  * que de faire une simple assertion de type. 
+  * */
   fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): Product {
     const data = snapshot.data(options);
 

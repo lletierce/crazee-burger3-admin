@@ -1,6 +1,6 @@
 import { LuX } from "react-icons/lu";
-import { useBodyScrollLock } from "./hooks/useBodyScrollLock";
 import { primaryNavItems, secondaryActions } from "./navigation.config";
+import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
 
 interface MobileMenuPanelProps {
     isOpen: boolean;

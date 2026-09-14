@@ -11,6 +11,7 @@ import { useState } from "react";
 import { useFilteredProducts } from "../../features/products/hooks/useFilteredProducts";
 import { SearchInput } from "../../features/products/components/Toolbar/SearchInput";
 import { AddProductButton } from "../../features/products/components/Toolbar/AddProductButton";
+import { AddProductModal } from "../../features/products/components/AddProduct/AddProductModal";
 
 export default function ProductsPage() {
 
@@ -25,7 +26,9 @@ export default function ProductsPage() {
     products, category, setCategory,
     sortField, setSortField, sortOrder, setSortOrder,
     isLoading, error, hasMore, isLoadingMore, loadMore,
+    refetch,
   } = useProducts();
+
 
   const filteredProducts = useFilteredProducts(products, searchTerm);
   const emptyMessage = searchTerm
@@ -53,7 +56,7 @@ export default function ProductsPage() {
             <SortMenu value={sortField} onChange={setSortField} />
             <SortOrderToggle value={sortOrder} onChange={setSortOrder} />
             <SearchInput value={searchTerm} onChange={setSearchTerm} />
-            <AddProductButton onClick={() => {setIsAddProductOpen(true), console.log(isAddProductOpen)}} />
+            <AddProductButton onClick={() => { setIsAddProductOpen(true) }} />
           </div>
         </div>
 
@@ -86,6 +89,11 @@ export default function ProductsPage() {
           )}
         </div>
       </div>
+      <AddProductModal
+        isOpen={isAddProductOpen}
+        onClose={() => setIsAddProductOpen(false)}
+        onProductCreated={refetch}
+      />
     </MainLayout>
   )
 }
