@@ -10,17 +10,6 @@ interface ModalProps {
   children: ReactNode;
 }
 
-/**
- * Generic on purpose — this isn't "the add-product modal", it's "a
- * modal", reused by anything that needs one later (edit product, delete
- * confirmation...). Same reasoning as `useClickOutside` and
- * `useBodyScrollLock` before it: a second consumer is what justifies the
- * shared/ home, not a guess that one might show up eventually — and
- * here, "any future modal in this app" is a near-certainty, not a guess.
- *
- * Reuses `useBodyScrollLock` (already built for `MobileMenuPanel`)
- * rather than reimplementing scroll-locking — same need, same fix.
- */
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   useBodyScrollLock(isOpen);
 
@@ -45,9 +34,6 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
     >
-      {/* stopPropagation: without it, a click anywhere inside the panel
-          would bubble up to the backdrop's onClick and close the modal —
-          the exact opposite of what clicking the form should do. */}
       <div
         role="dialog"
         aria-modal="true"
@@ -63,7 +49,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             aria-label="Fermer"
             className="text-neutral-400 hover:text-neutral-700"
           >
-            <LuX size={20} cursor="pointer" />
+            <LuX size={20} cursor="pointer"/>
           </button>
         </div>
 

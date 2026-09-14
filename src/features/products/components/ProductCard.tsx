@@ -1,25 +1,15 @@
 import type { KeyboardEvent } from 'react';
-import { formatPrice } from '../../../shared/utils/formatPrice';
+import { LuX } from 'react-icons/lu';
 import type { Product } from '../types/product.types';
+import { formatPrice } from '../../../shared/utils/formatPrice';
 
 interface ProductCardProps {
   product: Product;
   onSelect?: (product: Product) => void;
+  onDelete?: (product: Product) => void;
 }
 
-/**
- * `onSelect` is optional because this card is meant to be reusable
- * beyond "click to see details" — e.g. a future picker/preview context
- * where it's purely informational. Rather than switching the root
- * element between `<button>` and `<div>` (which gets messy to type in
- * TypeScript), we always render a `<div>` and only attach interactive
- * behavior — `role="button"`, keyboard focus, and Enter/Space handling —
- * when `onSelect` is actually provided. This is the manual version of
- * what a real `<button>` gives you for free; it's more code, but it's
- * the correct pattern any time a non-button element needs to act like
- * one for accessibility (screen readers, keyboard-only navigation).
- */
-export function ProductCard({ product, onSelect }: ProductCardProps) {
+export function ProductCard({ product, onSelect, onDelete }: ProductCardProps) {
   const isClickable = Boolean(onSelect);
 
   const handleClick = () => {
@@ -69,6 +59,37 @@ export function ProductCard({ product, onSelect }: ProductCardProps) {
               Indisponible
             </span>
           </div>
+        )}
+
+        {/*
+          `event.stopPropagation()` est ce qui empêche ce clic de
+          "remonter" jusqu'au `onClick` du conteneur parent (qui
+          déclencherait `onSelect`, la navigation vers le détail produit,
+          en même temps que la suppression). Sans ça, cliquer sur la
+          croix ferait DEUX choses à la fois : ouvrir la confirmation de
+          suppression ET naviguer — exactement le genre de bug qu'on ne
+          remarque qu'en testant en vrai.
+
+          Compromis assumé, pas ignoré : imbriquer un vrai `<button>`
+          dans un conteneur `role="button"` n'est pas la sémantique ARIA
+          la plus pure (un élément interactif dans un autre élément
+          interactif). C'est un compromis pragmatique très courant pour
+          ce genre de "carte avec action rapide" — le bouton interne
+          reste focusable et actionnable indépendamment au clavier, ce
+          qui est ce qui compte le plus en pratique.
+        */}
+        {onDelete && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onDelete(product);
+            }}
+            aria-label={`Supprimer ${product.name}`}
+            className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-neutral-600 shadow-sm transition-colors hover:bg-red-50 hover:text-red-600"
+          >
+            <LuX size={14} cursor="pointer" />
+          </button>
         )}
       </div>
 

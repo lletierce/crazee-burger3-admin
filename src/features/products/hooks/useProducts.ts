@@ -20,6 +20,7 @@ interface UseProductsResult {
   setSortField: (field: ProductSortField) => void;
   sortOrder: SortOrder;
   setSortOrder: (order: SortOrder) => void;
+  removeProduct: (id: string) => void;
   refetch: () => void;
 }
 
@@ -128,6 +129,18 @@ export function useProducts({ pageSize = 20 }: UseProductsOptions = {}): UseProd
       });
   }, [category, sortField, sortOrder, cursor, hasMore, isLoading, isLoadingMore, pageSize]);
 
+  /**
+   * Unlike `refetch` (a full page-one reload, needed after a creation
+   * because we don't know where the new item ranks under the current
+   * sort), a deletion doesn't need any network round trip to update the
+   * list correctly — we already know exactly which item to remove.
+   * Just filtering it out of local state is both cheaper (zero extra
+   * Firestore reads) and instant (no loading flicker).
+   */
+  const removeProduct = useCallback((id: string) => {
+    setProducts((current) => current.filter((product) => product.id !== id));
+  }, []);
+
   return {
     products,
     isLoading,
@@ -141,6 +154,7 @@ export function useProducts({ pageSize = 20 }: UseProductsOptions = {}): UseProd
     setSortField,
     sortOrder,
     setSortOrder,
+    removeProduct,
     refetch: fetchFirstPage,
   };
 }

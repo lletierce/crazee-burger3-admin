@@ -12,21 +12,21 @@ import { useFilteredProducts } from "../../features/products/hooks/useFilteredPr
 import { SearchInput } from "../../features/products/components/Toolbar/SearchInput";
 import { AddProductButton } from "../../features/products/components/Toolbar/AddProductButton";
 import { AddProductModal } from "../../features/products/components/AddProduct/AddProductModal";
+import type { Product } from "../../features/products/types/product.types";
+import { DeleteProductModal } from "../../features/products/components/DeleteProduct/DeleteProductModal";
 
 export default function ProductsPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
-
-  // TODO: remplacer par l'ouverture réelle du formulaire/modal d'ajout,
-  // à construire dans la prochaine étape. Pour l'instant, ce state prouve
-  // juste que le bouton déclenche bien quelque chose.
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [productPendingDeletion, setProductPendingDeletion] = useState<Product | null>(null);
+
 
   const {
     products, category, setCategory,
     sortField, setSortField, sortOrder, setSortOrder,
     isLoading, error, hasMore, isLoadingMore, loadMore,
-    refetch,
+    removeProduct, refetch,
   } = useProducts();
 
 
@@ -70,6 +70,7 @@ export default function ProductsPage() {
             <>
               <ProductsGrid
                 products={filteredProducts}
+                onDeleteProduct={setProductPendingDeletion}
                 emptyMessage={emptyMessage}
               />
 
@@ -93,6 +94,11 @@ export default function ProductsPage() {
         isOpen={isAddProductOpen}
         onClose={() => setIsAddProductOpen(false)}
         onProductCreated={refetch}
+      />
+      <DeleteProductModal
+        product={productPendingDeletion}
+        onClose={() => setProductPendingDeletion(null)}
+        onDeleted={removeProduct}
       />
     </MainLayout>
   )

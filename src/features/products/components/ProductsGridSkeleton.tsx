@@ -1,5 +1,5 @@
 import { ProductCardSkeleton } from './ProductCardSkeleton';
-import ProductsGridLayout from './ProductsGridLayout';
+import { ProductsGridLayout } from './ProductsGridLayout';
 
 interface ProductsGridSkeletonProps {
   count?: number;

@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   limit,
@@ -161,4 +162,14 @@ export async function createProduct(input: NewProductInput): Promise<Product> {
   await setDoc(docRef, newProduct);
 
   return newProduct;
+}
+
+/**
+ * Deletion doesn't need a slug check or any read beforehand — unlike
+ * `createProduct`, there's no uniqueness constraint to protect and no
+ * derived data to compute. It's the simplest write operation in this
+ * file: one write, that's it.
+ */
+export async function deleteProduct(id: string): Promise<void> {
+  await deleteDoc(doc(productsCollection, id));
 }
