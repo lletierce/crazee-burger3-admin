@@ -69,6 +69,19 @@ export async function fetchProductsPage({
   };
 }
 
+/**
+ * `null` en retour (pas une exception) quand aucun produit ne correspond
+ * — un slug qui ne matche rien est un résultat valide et attendu (lien
+ * cassé, produit supprimé, faute de frappe dans l'URL), pas une erreur.
+ * C'est exactement la distinction qu'un serveur fait entre un 404 et un
+ * 500 : `useProduct` (juste après) s'appuie là-dessus pour distinguer
+ * "produit introuvable" de "quelque chose a vraiment planté".
+ */
+export async function fetchProductBySlug(slug: string): Promise<Product | null> {
+  const snapshot = await getDocs(query(productsCollection, where('slug', '==', slug), limit(1)));
+  return snapshot.empty ? null : snapshot.docs[0].data();
+}
+
 /** 
  * Cette erreur est utilisée à la place d'un `Error` générique afin que
  * le formulaire puisse distinguer un slug déjà utilisé d'une erreur réseau

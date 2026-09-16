@@ -2,17 +2,23 @@ import type { Product } from "../types/product.types";
 import { ProductCard } from "./ProductCard";
 import { ProductsGridLayout } from "./ProductsGridLayout";
 
-
 interface ProductsGridProps {
   products: Product[];
-  onSelectProduct?: (product: Product) => void;
+  /**
+   * Resolves each product's detail-page URL. A function, not a fixed
+   * string prefix — keeps this component ignorant of the exact route
+   * shape (`/produits/:slug`), the same way it already knows nothing
+   * about Firestore. If the URL scheme changes later, only the caller
+   * that builds this function needs to change.
+   */
+  getProductHref?: (product: Product) => string;
   onDeleteProduct?: (product: Product) => void;
   emptyMessage?: string;
 }
 
 export function ProductsGrid({
   products,
-  onSelectProduct,
+  getProductHref,
   onDeleteProduct,
   emptyMessage = 'Aucun produit à afficher.',
 }: ProductsGridProps) {
@@ -23,7 +29,12 @@ export function ProductsGrid({
   return (
     <ProductsGridLayout>
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} onSelect={onSelectProduct} onDelete={onDeleteProduct} />
+        <ProductCard
+          key={product.id}
+          product={product}
+          to={getProductHref?.(product)}
+          onDelete={onDeleteProduct}
+        />
       ))}
     </ProductsGridLayout>
   );

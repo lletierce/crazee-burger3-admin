@@ -1,38 +1,18 @@
-import type { KeyboardEvent } from 'react';
 import { LuX } from 'react-icons/lu';
 import type { Product } from '../types/product.types';
 import { formatPrice } from '../../../shared/utils/formatPrice';
+import { Link } from 'react-router';
 
 interface ProductCardProps {
   product: Product;
-  onSelect?: (product: Product) => void;
+  /** The URL this card should navigate to. Omit to render a non-clickable card. */
+  to?: string;
   onDelete?: (product: Product) => void;
 }
 
-export function ProductCard({ product, onSelect, onDelete }: ProductCardProps) {
-  const isClickable = Boolean(onSelect);
-
-  const handleClick = () => {
-    onSelect?.(product);
-  };
-
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onSelect?.(product);
-    }
-  };
-
-  return (
-    <div
-      role={isClickable ? 'button' : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      onClick={isClickable ? handleClick : undefined}
-      onKeyDown={isClickable ? handleKeyDown : undefined}
-      className={`group flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white transition-shadow ${
-        isClickable ? 'cursor-pointer hover:shadow-md' : ''
-      }`}
-    >
+export function ProductCard({ product, to, onDelete }: ProductCardProps) {
+  const content = (
+    <>
       <div className="relative aspect-square w-full overflow-hidden bg-neutral-100">
         {product.imageUrl ? (
           <img
@@ -61,27 +41,11 @@ export function ProductCard({ product, onSelect, onDelete }: ProductCardProps) {
           </div>
         )}
 
-        {/*
-          `event.stopPropagation()` est ce qui empêche ce clic de
-          "remonter" jusqu'au `onClick` du conteneur parent (qui
-          déclencherait `onSelect`, la navigation vers le détail produit,
-          en même temps que la suppression). Sans ça, cliquer sur la
-          croix ferait DEUX choses à la fois : ouvrir la confirmation de
-          suppression ET naviguer — exactement le genre de bug qu'on ne
-          remarque qu'en testant en vrai.
-
-          Compromis assumé, pas ignoré : imbriquer un vrai `<button>`
-          dans un conteneur `role="button"` n'est pas la sémantique ARIA
-          la plus pure (un élément interactif dans un autre élément
-          interactif). C'est un compromis pragmatique très courant pour
-          ce genre de "carte avec action rapide" — le bouton interne
-          reste focusable et actionnable indépendamment au clavier, ce
-          qui est ce qui compte le plus en pratique.
-        */}
         {onDelete && (
           <button
             type="button"
             onClick={(event) => {
+              event.preventDefault();
               event.stopPropagation();
               onDelete(product);
             }}
@@ -102,6 +66,20 @@ export function ProductCard({ product, onSelect, onDelete }: ProductCardProps) {
           <span className="text-xs text-neutral-500">Qté : {product.quantity}</span>
         </div>
       </div>
-    </div>
+    </>
   );
+
+  const cardClassName = `group flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white transition-all duration-200 ${
+    to ? 'hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-lg hover:shadow-amber-200/50' : ''
+  }`;
+
+  if (to) {
+    return (
+      <Link to={to} className={cardClassName}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={cardClassName}>{content}</div>;
 }

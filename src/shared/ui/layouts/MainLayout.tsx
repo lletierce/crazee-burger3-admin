@@ -25,7 +25,7 @@ export default function MainLayout({ children, ...navbarProps }: MainLayoutProps
                 md:overflow-hidden 
                 md:rounded-2xl 
                 md:bg-white 
-                md:shadow-2xl"
+                md:shadow-[inset_0_-24px_24px_-24px_rgba(0,0,0,0.5)]"
             >
                 <Navbar {...navbarProps} />
                 <div>{children}</div>

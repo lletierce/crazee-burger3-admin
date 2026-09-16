@@ -3,10 +3,11 @@ import LoginPage from "../../pages/auth/LoginPage";
 import NotFoundPage from "../../pages/error/NotFoundPage";
 import DebugPage from "../../pages/error/DebugPage";
 import { useAuth } from "../providers/AuthProvider";
-import ProtectedRoute from "./ProtectedRoute";
+// import ProtectedRoute from "./ProtectedRoute";
 import ProductsPage from "../../pages/products/ProductsPage";
 import ResetPasswordPage from "../../pages/auth/ResetPasswordPage";
 import RecoveryPage from "../../pages/auth/RecoveryPage";
+import { ProductPage } from "../../pages/products/ProductPage";
 
 export default function AppRouter() {
 
@@ -27,6 +28,7 @@ export default function AppRouter() {
 
         <Route path="/produits" element={<ProductsPage />} />
 
+        <Route path="/produits/:slug" element={<ProductPage />} />
 
         {/* Routes privées */}
         {/* <Route element={<ProtectedRoute />}>

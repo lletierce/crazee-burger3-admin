@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router"
+import { useNavigate, useSearchParams } from "react-router"
 import MainLayout from "../../shared/ui/layouts/MainLayout";
 import { logout } from "../../features/auth/logout"
 import { ProductsGrid } from "../../features/products/components/ProductsGrid";
@@ -12,10 +12,20 @@ import { useFilteredProducts } from "../../features/products/hooks/useFilteredPr
 import { SearchInput } from "../../features/products/components/Toolbar/SearchInput";
 import { AddProductButton } from "../../features/products/components/Toolbar/AddProductButton";
 import { AddProductModal } from "../../features/products/components/AddProduct/AddProductModal";
-import type { Product } from "../../features/products/types/product.types";
+import { PRODUCT_CATEGORIES, type Product, type ProductCategory } from "../../features/products/types/product.types";
 import { DeleteProductModal } from "../../features/products/components/DeleteProduct/DeleteProductModal";
 
 export default function ProductsPage() {
+
+  const [searchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
+  // On ne fait jamais confiance à une donnée venant de l'URL sans la
+  // valider — même logique que pour les données Firestore, mais ici la
+  // source de vérité extérieure est l'URL, pas la base.
+  const initialCategory: ProductCategory | null = PRODUCT_CATEGORIES.includes(categoryParam as ProductCategory)
+  ? (categoryParam as ProductCategory)
+  : null;
+
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
@@ -27,7 +37,7 @@ export default function ProductsPage() {
     sortField, setSortField, sortOrder, setSortOrder,
     isLoading, error, hasMore, isLoadingMore, loadMore,
     removeProduct, refetch,
-  } = useProducts();
+  } = useProducts({ initialCategory });
 
 
   const filteredProducts = useFilteredProducts(products, searchTerm);
@@ -70,6 +80,7 @@ export default function ProductsPage() {
             <>
               <ProductsGrid
                 products={filteredProducts}
+                getProductHref={(product) => `/produits/${product.slug}`}
                 onDeleteProduct={setProductPendingDeletion}
                 emptyMessage={emptyMessage}
               />

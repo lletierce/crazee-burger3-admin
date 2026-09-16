@@ -4,6 +4,7 @@ import type { Product, ProductCategory, ProductSortField, SortOrder } from '../t
 
 interface UseProductsOptions {
   pageSize?: number;
+  initialCategory?: ProductCategory | null;
 }
 
 interface UseProductsResult {
@@ -38,8 +39,10 @@ interface UseProductsResult {
  * in memory, so it doesn't need to touch the network or reset pagination;
  * it belongs in the component that renders the list, not in this hook.
  */
-export function useProducts({ pageSize = 20 }: UseProductsOptions = {}): UseProductsResult {
-  const [category, setCategory] = useState<ProductCategory | null>(null);
+export function useProducts({
+  pageSize = 20, initialCategory = null,
+}: UseProductsOptions = {}): UseProductsResult {
+  const [category, setCategory] = useState<ProductCategory | null>(initialCategory);
   const [sortField, setSortField] = useState<ProductSortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
