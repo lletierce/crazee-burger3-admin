@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
+import { PRODUCT_CATEGORIES, type Product, type ProductCategory } from '../../types/product.types';
 import { validateProductForm, type ProductFormErrors, type ProductFormValues } from '../../validation/productValidation';
 import { createProduct, SlugAlreadyExistsError } from '../../api/products.api';
-import { PRODUCT_CATEGORIES, type ProductCategory } from '../../types/product.types';
 
 interface AddProductFormProps {
-  onSuccess: () => void;
+  onSuccess: (product: Product) => void;
   onCancel: () => void;
 }
 
@@ -52,7 +52,7 @@ export function AddProductForm({ onSuccess, onCancel }: AddProductFormProps) {
 
     setIsSubmitting(true);
     try {
-      await createProduct({
+      const createdProduct = await createProduct({
         name: values.name.trim(),
         category: values.category as ProductCategory,
         price: Number(values.price),
@@ -61,7 +61,7 @@ export function AddProductForm({ onSuccess, onCancel }: AddProductFormProps) {
         isAvailable: values.isAvailable,
         isPromoted: values.isPromoted,
       });
-      onSuccess();
+      onSuccess(createdProduct);
     } catch (error) {
       if (error instanceof SlugAlreadyExistsError) {
         setErrors((current) => ({
@@ -203,14 +203,14 @@ export function AddProductForm({ onSuccess, onCancel }: AddProductFormProps) {
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 cursor-pointer"
+          className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
         >
           Annuler
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-amber-400 px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-amber-500 disabled:opacity-50 cursor-pointer"
+          className="rounded-md bg-amber-400 px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-amber-500 disabled:opacity-50"
         >
           {isSubmitting ? 'Création...' : 'Créer le produit'}
         </button>

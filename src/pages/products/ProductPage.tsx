@@ -1,17 +1,40 @@
-import { useParams } from 'react-router';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { LuPencil, LuTrash2 } from 'react-icons/lu';
 import { useProduct } from '../../features/products/hooks/useProduct';
+import MainLayout from '../../shared/ui/layouts/MainLayout';
 import { ProductPageSkeleton } from '../../features/products/components/ProductPageSkeleton';
 import NotFoundPage from '../error/NotFoundPage';
 import { Breadcrumbs } from '../../shared/ui/components/Breadcrumbs';
-import { LuPencil, LuTrash2 } from 'react-icons/lu';
+import { DeleteProductModal } from '../../features/products/components/DeleteProduct/DeleteProductModal';
 import { formatPrice } from '../../shared/utils/formatPrice';
 import { formatDate } from '../../shared/utils/formatDate';
-import MainLayout from '../../shared/ui/layouts/MainLayout';
 
 
 export function ProductPage() {
   const { slug = '' } = useParams<{ slug: string }>();
   const { product, isLoading, error, notFound } = useProduct(slug);
+  const navigate = useNavigate();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  /**
+   * Called by DeleteProductModal AFTER the Firestore delete has already
+   * succeeded — `product` is still the last value useProduct fetched
+   * (deleting the document doesn't retroactively clear local state), so
+   * `product.name` is safe to read here for the message, one last time
+   * before this component unmounts on navigation.
+   *
+   * The message travels through `navigate`'s `state` option — a plain
+   * react-router capability, no new dependency, no global store. It
+   * only exists for the single navigation that follows; ProductsPage
+   * reads it once and scrubs it from history so a refresh or a
+   * back/forward doesn't resurface a stale "produit supprimé" toast.
+   */
+  function handleDeleted() {
+    navigate('/produits', {
+      state: { flashMessage: `« ${product?.name} » a été supprimé.` },
+    });
+  }
 
   return (
     <MainLayout userDisplayName="Loris LETIERCE" onLogout={() => { }}>
@@ -42,19 +65,26 @@ export function ProductPage() {
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 cursor-pointer"
+                className="flex items-center gap-2 rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
               >
                 <LuPencil size={16} />
                 Modifier
               </button>
               <button
                 type="button"
-                className="flex items-center gap-2 rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 cursor-pointer"
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="flex items-center gap-2 rounded-md border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
               >
                 <LuTrash2 size={16} />
                 Supprimer
               </button>
             </div>
+
+            <DeleteProductModal
+              product={isDeleteModalOpen ? product : null}
+              onClose={() => setIsDeleteModalOpen(false)}
+              onDeleted={handleDeleted}
+            />
 
             {/*
               Panneau bordé unique englobant texte + image : c'est CE

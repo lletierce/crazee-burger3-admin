@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router"
+import { useLocation, useNavigate, useSearchParams } from "react-router"
 import MainLayout from "../../shared/ui/layouts/MainLayout";
 import { logout } from "../../features/auth/logout"
 import { ProductsGrid } from "../../features/products/components/ProductsGrid";
@@ -7,13 +7,15 @@ import { CategoryFilter } from "../../features/products/components/Toolbar/Categ
 import { ProductsGridSkeleton } from "../../features/products/components/ProductsGridSkeleton";
 import { SortMenu } from "../../features/products/components/Toolbar/SortMenu";
 import { SortOrderToggle } from "../../features/products/components/Toolbar/SortOrderToggle";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFilteredProducts } from "../../features/products/hooks/useFilteredProducts";
 import { SearchInput } from "../../features/products/components/Toolbar/SearchInput";
 import { AddProductButton } from "../../features/products/components/Toolbar/AddProductButton";
 import { AddProductModal } from "../../features/products/components/AddProduct/AddProductModal";
 import { PRODUCT_CATEGORIES, type Product, type ProductCategory } from "../../features/products/types/product.types";
 import { DeleteProductModal } from "../../features/products/components/DeleteProduct/DeleteProductModal";
+import { Toast } from "../../shared/ui/components/Toast";
+import { formatProductFlashMessage } from "../../shared/utils/productFlashMessages";
 
 export default function ProductsPage() {
 
@@ -23,8 +25,8 @@ export default function ProductsPage() {
   // valider — même logique que pour les données Firestore, mais ici la
   // source de vérité extérieure est l'URL, pas la base.
   const initialCategory: ProductCategory | null = PRODUCT_CATEGORIES.includes(categoryParam as ProductCategory)
-  ? (categoryParam as ProductCategory)
-  : null;
+    ? (categoryParam as ProductCategory)
+    : null;
 
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,13 +49,42 @@ export default function ProductsPage() {
       : `Aucun produit ne correspond à "${searchTerm}".`
     : undefined;
 
+  const location = useLocation();
   const navigate = useNavigate()
+
+  // Lu une seule fois, à l'initialisation — capturé via la forme
+  // "fonction" de useState pour ne s'exécuter qu'au premier rendu.
+  const [flashMessage, setFlashMessage] = useState<string | null>(
+    () => (location.state as { flashMessage?: string } | null)?.flashMessage ?? null,
+  );
+
+  // Nettoie le state de l'historique une seule fois au montage — sinon un
+  // rafraîchissement de page ou un retour arrière ferait réapparaître le
+  // message "produit supprimé" alors que ce n'est plus d'actualité.
+  useEffect(() => {
+    if (flashMessage) {
+      navigate(location.pathname + location.search, { replace: true, state: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const handleLogout = async () => {
     await logout()
     navigate('/login')
   }
-  <button onClick={handleLogout}>Logout</button>
+
+  function handleProductCreated(product: Product) {
+    refetch();
+    setFlashMessage(formatProductFlashMessage(product.name, 'ajouté'));
+  }
+
+  function handleProductDeleted(id: string) {
+    if (productPendingDeletion) {
+      setFlashMessage(formatProductFlashMessage(productPendingDeletion.name, 'supprimé'));
+    }
+    removeProduct(id);
+  }
 
 
   return (
@@ -104,13 +135,14 @@ export default function ProductsPage() {
       <AddProductModal
         isOpen={isAddProductOpen}
         onClose={() => setIsAddProductOpen(false)}
-        onProductCreated={refetch}
+        onProductCreated={handleProductCreated}
       />
       <DeleteProductModal
         product={productPendingDeletion}
         onClose={() => setProductPendingDeletion(null)}
-        onDeleted={removeProduct}
+        onDeleted={handleProductDeleted}
       />
+      {flashMessage && <Toast message={flashMessage} onDismiss={() => setFlashMessage(null)} />}
     </MainLayout>
   )
 }
