@@ -16,6 +16,7 @@ import { PRODUCT_CATEGORIES, type Product, type ProductCategory } from "../../fe
 import { DeleteProductModal } from "../../features/products/components/DeleteProduct/DeleteProductModal";
 import { Toast } from "../../shared/ui/components/Toast";
 import { formatProductFlashMessage } from "../../shared/utils/productFlashMessages";
+import { useFlashMessage } from "../../shared/hooks/useFlashMessage";
 
 export default function ProductsPage() {
 
@@ -52,9 +53,7 @@ export default function ProductsPage() {
   const location = useLocation();
   const navigate = useNavigate()
 
-  // Lu une seule fois, à l'initialisation — capturé via la forme
-  // "fonction" de useState pour ne s'exécuter qu'au premier rendu.
-  const [flashMessage, setFlashMessage] = useState<string | null>(
+  const { message: flashMessage, show: showFlashMessage, clear: clearFlashMessage } = useFlashMessage(
     () => (location.state as { flashMessage?: string } | null)?.flashMessage ?? null,
   );
 
@@ -76,12 +75,12 @@ export default function ProductsPage() {
 
   function handleProductCreated(product: Product) {
     refetch();
-    setFlashMessage(formatProductFlashMessage(product.name, 'ajouté'));
+    showFlashMessage(formatProductFlashMessage(product.name, 'ajouté'));
   }
 
   function handleProductDeleted(id: string) {
     if (productPendingDeletion) {
-      setFlashMessage(formatProductFlashMessage(productPendingDeletion.name, 'supprimé'));
+      showFlashMessage(formatProductFlashMessage(productPendingDeletion.name, 'supprimé'));
     }
     removeProduct(id);
   }
@@ -142,7 +141,7 @@ export default function ProductsPage() {
         onClose={() => setProductPendingDeletion(null)}
         onDeleted={handleProductDeleted}
       />
-      {flashMessage && <Toast message={flashMessage} onDismiss={() => setFlashMessage(null)} />}
+      {flashMessage && <Toast message={flashMessage} onDismiss={clearFlashMessage} />}
     </MainLayout>
   )
 }
