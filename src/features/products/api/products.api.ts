@@ -186,3 +186,63 @@ export async function createProduct(input: NewProductInput): Promise<Product> {
 export async function deleteProduct(id: string): Promise<void> {
   await deleteDoc(doc(productsCollection, id));
 }
+
+/**
+ * What the caller gets back after an update — deliberately NOT the full
+ * `Product`. The caller (EditProductModal) already has the product it
+ * just edited; the only two things it genuinely can't know on its own
+ * are the two fields THIS function computes: the (possibly changed)
+ * slug, and the new `lastUpdated` timestamp. Returning just these two
+ * avoids an unnecessary extra Firestore read to fetch the full document
+ * back after writing it.
+ */
+interface UpdateProductResult {
+  slug: string;
+  lastUpdated: Date;
+}
+
+
+// export async function updateProduct(id: string, input: NewProductInput): Promise<UpdateProductResult> {
+//   const slug = slugify(input.name);
+
+//   const existing = await getDocs(query(productsCollection, where('slug', '==', slug), limit(2)));
+//   const conflictsWithAnotherProduct = existing.docs.some((docSnapshot) => docSnapshot.id !== id);
+//   if (conflictsWithAnotherProduct) {
+//     throw new SlugAlreadyExistsError(slug);
+//   }
+
+//   const lastUpdated = new Date();
+//   const docRef = doc(productsCollection, id);
+
+//   // Goes through productConverter.toFirestore too, same as every other
+//   // write — including the undefined-stripping fix from earlier.
+//   await updateDoc(docRef, { ...input, slug, lastUpdated });
+
+//   return { slug, lastUpdated };
+// }
+
+export async function updateProduct(id: string, input: NewProductInput): Promise<UpdateProductResult> {
+  const slug = slugify(input.name);
+
+  const existing = await getDocs(query(productsCollection, where('slug', '==', slug), limit(2)));
+  const conflictsWithAnotherProduct = existing.docs.some((docSnapshot) => docSnapshot.id !== id);
+  if (conflictsWithAnotherProduct) {
+    throw new SlugAlreadyExistsError(slug);
+  }
+
+  const lastUpdated = new Date();
+  const docRef = doc(productsCollection, id);
+
+  // `setDoc(..., { merge: true })`, PAS `updateDoc` : updateDoc()
+  // n'appelle jamais le converter d'une référence Firestore, même
+  // quand `.withConverter()` a été attaché à la collection — un
+  // comportement du SDK peu intuitif, mais documenté. setDoc avec
+  // merge, lui, passe bien par `toFirestore()` (sa deuxième
+  // signature, celle en PartialWithFieldValue) — exactement celle
+  // qui contient déjà le filtrage des valeurs `undefined`. Même
+  // résultat qu'une mise à jour partielle (les champs non fournis,
+  // comme `createdAt`, restent intacts), mais par le bon chemin.
+  await setDoc(docRef, { ...input, slug, lastUpdated }, { merge: true });
+
+  return { slug, lastUpdated };
+}

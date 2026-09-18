@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { LuPencil, LuTrash2 } from 'react-icons/lu';
 import { useProduct } from '../../features/products/hooks/useProduct';
 import MainLayout from '../../shared/ui/layouts/MainLayout';
@@ -9,31 +9,65 @@ import { Breadcrumbs } from '../../shared/ui/components/Breadcrumbs';
 import { DeleteProductModal } from '../../features/products/components/DeleteProduct/DeleteProductModal';
 import { formatPrice } from '../../shared/utils/formatPrice';
 import { formatDate } from '../../shared/utils/formatDate';
+import { useFlashMessage } from '../../shared/hooks/useFlashMessage';
+import { formatProductFlashMessage } from '../../shared/utils/productFlashMessages';
+import { EditProductModal, type ProductUpdatedInfo } from '../../features/products/components/EditProduct/EditProductModal';
+import { Toast } from '../../shared/ui/components/Toast';
 
 
 export function ProductPage() {
   const { slug = '' } = useParams<{ slug: string }>();
-  const { product, isLoading, error, notFound } = useProduct(slug);
+  const { product, isLoading, error, notFound, refetch } = useProduct(slug);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  /**
-   * Called by DeleteProductModal AFTER the Firestore delete has already
-   * succeeded — `product` is still the last value useProduct fetched
-   * (deleting the document doesn't retroactively clear local state), so
-   * `product.name` is safe to read here for the message, one last time
-   * before this component unmounts on navigation.
-   *
-   * The message travels through `navigate`'s `state` option — a plain
-   * react-router capability, no new dependency, no global store. It
-   * only exists for the single navigation that follows; ProductsPage
-   * reads it once and scrubs it from history so a refresh or a
-   * back/forward doesn't resurface a stale "produit supprimé" toast.
-   */
+  const { message: flashMessage, show: showFlashMessage, clear: clearFlashMessage } = useFlashMessage(
+    () => (location.state as { flashMessage?: string } | null)?.flashMessage ?? null,
+  );
+
+  // Scrub the message from history once, right after reading it — same
+  // reasoning walked through in detail previously: without this, an
+  // F5 on this exact page after arriving from a redirect would
+  // resurface a stale toast.
+  useEffect(() => {
+    if (flashMessage) {
+      navigate(location.pathname + location.search, { replace: true, state: null });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
   function handleDeleted() {
     navigate('/produits', {
-      state: { flashMessage: `« ${product?.name} » a été supprimé.` },
+      state: { flashMessage: product ? formatProductFlashMessage(product.name, 'supprimé') : undefined },
     });
+  }
+
+  /**
+   * Two genuinely different outcomes, handled differently on purpose:
+   *
+   * - The name (and therefore the slug) changed: this page is currently
+   *   at `/produits/:slug` for the OLD slug, which no longer matches
+   *   anything — `useProduct` would report "not found" on the next
+   *   fetch. `replace: true` because we're correcting the URL to point
+   *   at the same logical product, not navigating to a different page
+   *   the user should be able to "back" away from.
+   * - The name didn't change: same URL is still correct, no navigation
+   *   needed — just tell `useProduct` to refetch so the page reflects
+   *   the edit immediately, and show the toast locally.
+   */
+  function handleProductUpdated({ name, slug: newSlug, slugChanged }: ProductUpdatedInfo) {
+    if (slugChanged) {
+      navigate(`/produits/${newSlug}`, {
+        replace: true,
+        state: { flashMessage: formatProductFlashMessage(name, 'modifié') },
+      });
+    } else {
+      showFlashMessage(formatProductFlashMessage(name, 'modifié'));
+      refetch();
+    }
   }
 
   return (
@@ -65,6 +99,7 @@ export function ProductPage() {
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
+                onClick={() => setIsEditModalOpen(true)}
                 className="flex items-center gap-2 rounded-md border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
               >
                 <LuPencil size={16} />
@@ -85,6 +120,14 @@ export function ProductPage() {
               onClose={() => setIsDeleteModalOpen(false)}
               onDeleted={handleDeleted}
             />
+
+            <EditProductModal
+              product={isEditModalOpen ? product : null}
+              onClose={() => setIsEditModalOpen(false)}
+              onProductUpdated={handleProductUpdated}
+            />
+
+            {flashMessage && <Toast message={flashMessage} onDismiss={clearFlashMessage} />}
 
             {/*
               Panneau bordé unique englobant texte + image : c'est CE

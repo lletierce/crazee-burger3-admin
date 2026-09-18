@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Product } from '../types/product.types';
 import { fetchProductBySlug } from '../api/products.api';
 
@@ -8,6 +8,7 @@ interface UseProductResult {
   isLoading: boolean;
   error: Error | null;
   notFound: boolean;
+  refetch: () => void;
 }
 
 /**
@@ -15,10 +16,16 @@ interface UseProductResult {
  * no product is a normal, expected outcome — not a failure — so
  * `ProductPage` can show a calm "produit introuvable" message instead of
  * an alarming "something went wrong" banner for what's really just a
- * bad link. Same `requestIdRef` race-guard as `useProducts`: if the
- * user navigates from one product to another quickly (clicking a
- * different card before this one's fetch resolves), a stale response
- * won't overwrite the newer one.
+ * bad link. Same `requestIdRef` race-guard as `useProducts`.
+ *
+ * `refetch` exists for exactly one real case right now: after editing a
+ * product WITHOUT changing its name (so the slug, and therefore the
+ * URL, stays the same) — the component never unmounts, `slug` never
+ * changes, so the effect below never re-runs on its own. Without an
+ * explicit `refetch`, the page would keep showing the pre-edit values
+ * until a manual reload. Same reasoning as `useProducts`' `refetch`:
+ * extracted into its own `useCallback` because it now has two callers
+ * (the effect, and this manual trigger).
  */
 export function useProduct(slug: string): UseProductResult {
   const [product, setProduct] = useState<Product | null>(null);
@@ -28,13 +35,13 @@ export function useProduct(slug: string): UseProductResult {
 
   const requestIdRef = useRef(0);
 
-  useEffect(() => {
+  const fetchProduct = useCallback(() => {
     const requestId = ++requestIdRef.current;
     setIsLoading(true);
     setError(null);
     setNotFound(false);
 
-    fetchProductBySlug(slug)
+    return fetchProductBySlug(slug)
       .then((result) => {
         if (requestId !== requestIdRef.current) return;
         if (result === null) {
@@ -53,5 +60,9 @@ export function useProduct(slug: string): UseProductResult {
       });
   }, [slug]);
 
-  return { product, isLoading, error, notFound };
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
+
+  return { product, isLoading, error, notFound, refetch: fetchProduct };
 }
