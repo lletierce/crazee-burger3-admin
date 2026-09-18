@@ -3,6 +3,7 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  deleteField,
   limit,
   orderBy,
   query,
@@ -233,16 +234,18 @@ export async function updateProduct(id: string, input: NewProductInput): Promise
   const lastUpdated = new Date();
   const docRef = doc(productsCollection, id);
 
-  // `setDoc(..., { merge: true })`, PAS `updateDoc` : updateDoc()
-  // n'appelle jamais le converter d'une référence Firestore, même
-  // quand `.withConverter()` a été attaché à la collection — un
-  // comportement du SDK peu intuitif, mais documenté. setDoc avec
-  // merge, lui, passe bien par `toFirestore()` (sa deuxième
-  // signature, celle en PartialWithFieldValue) — exactement celle
-  // qui contient déjà le filtrage des valeurs `undefined`. Même
-  // résultat qu'une mise à jour partielle (les champs non fournis,
-  // comme `createdAt`, restent intacts), mais par le bon chemin.
-  await setDoc(docRef, { ...input, slug, lastUpdated }, { merge: true });
+  // `input.imageUrl` étant `undefined` signifie ici, sans ambiguïté,
+  // "l'utilisateur a vidé ce champ" — ProductForm ne produit jamais
+  // `undefined` pour une autre raison. On le traduit donc en
+  // `deleteField()`, le sentinel Firestore qui dit explicitement
+  // "efface ce champ" dans une écriture merge — par opposition à
+  // l'absence de la clé, qui dit "ne touche à rien ici" et laissait
+  // l'ancienne image intacte.
+  await setDoc(
+    docRef,
+    { ...input, imageUrl: input.imageUrl ?? deleteField(), slug, lastUpdated },
+    { merge: true },
+  );
 
   return { slug, lastUpdated };
 }
