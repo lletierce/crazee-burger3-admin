@@ -1,8 +1,8 @@
 import { Outlet } from "react-router";
-import { useAuth } from "../providers/AuthProvider";
 import { getUserDisplayName } from "../../features/auth/get-user-display-name";
 import { logout } from "../../features/auth/logout";
 import MainLayout from "../../shared/ui/layouts/MainLayout";
+import { useAuth } from "../providers/use-auth";
 
 
 export default function AuthenticatedLayout() {

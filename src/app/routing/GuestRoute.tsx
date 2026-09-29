@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router";
-import { useAuth } from "../providers/AuthProvider";
 import LoadingFull from "../../shared/ui/loader/LoadingFull";
+import { useAuth } from "../providers/use-auth";
 
 export default function GuestRoute() {
   const { user, authLoading } = useAuth();

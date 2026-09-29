@@ -15,7 +15,20 @@ export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
 export const PRODUCT_SORT_FIELDS = ['name', 'price', 'quantity', 'createdAt'] as const;
 export type ProductSortField = (typeof PRODUCT_SORT_FIELDS)[number];
 
+/**
+ * French labels for each sort field. Exported so the toolbar (or
+ * anything else that needs to display "currently sorted by X" as text)
+ * can reuse the same mapping instead of re-deriving it.
+ */
+export const SORT_FIELD_LABELS: Record<ProductSortField, string> = {
+  name: 'Nom',
+  price: 'Prix',
+  quantity: 'Quantité',
+  createdAt: 'Date de création',
+};
+
 export type SortOrder = 'asc' | 'desc';
+
 
 /**
  * A product as your APP understands it — this is the shape every

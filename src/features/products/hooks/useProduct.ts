@@ -61,6 +61,9 @@ export function useProduct(slug: string): UseProductResult {
   }, [slug]);
 
   useEffect(() => {
+    // Chargement de données : les setState "loading/error" au début de
+    // fetchProduct sont volontaires. Refacto prévue : TanStack Query.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProduct();
   }, [fetchProduct]);
 

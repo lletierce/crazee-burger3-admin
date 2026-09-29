@@ -1,9 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import LoginPage from "../../pages/auth/LoginPage";
 import NotFoundPage from "../../pages/error/NotFoundPage";
-import DebugPage from "../../pages/error/DebugPage";
 import ProductsPage from "../../pages/products/ProductsPage";
-import ResetPasswordPage from "../../pages/auth/ResetPasswordPage";
 import RecoveryPage from "../../pages/auth/RecoveryPage";
 import { ProductPage } from "../../pages/products/ProductPage";
 import GuestRoute from "./GuestRoute";
@@ -25,7 +23,6 @@ export default function AppRouter() {
 
         {/* Routes publiques (accessibles depuis le lien du mail) */}
         <Route path="/recovery" element={<RecoveryPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Routes privées */}
         <Route element={<ProtectedRoute />}>
@@ -36,7 +33,7 @@ export default function AppRouter() {
           </Route>
 
           {/* Pages sans navbar */}
-          <Route path="/debug" element={<DebugPage />} />
+          {/* <Route path="/example" element={<ExamplePage />} /> */}
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
