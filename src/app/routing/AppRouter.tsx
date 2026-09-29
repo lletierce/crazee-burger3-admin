@@ -2,38 +2,42 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import LoginPage from "../../pages/auth/LoginPage";
 import NotFoundPage from "../../pages/error/NotFoundPage";
 import DebugPage from "../../pages/error/DebugPage";
-import { useAuth } from "../providers/AuthProvider";
-// import ProtectedRoute from "./ProtectedRoute";
 import ProductsPage from "../../pages/products/ProductsPage";
 import ResetPasswordPage from "../../pages/auth/ResetPasswordPage";
 import RecoveryPage from "../../pages/auth/RecoveryPage";
 import { ProductPage } from "../../pages/products/ProductPage";
+import GuestRoute from "./GuestRoute";
+import ProtectedRoute from "./ProtectedRoute";
+import AuthenticatedLayout from "../layouts/AuthenticatedLayout";
 
 export default function AppRouter() {
-
-  const { user } = useAuth()
-
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to={user ? "/produits" : "/login"} />} />
-        <Route path="/login" element={<LoginPage />} />
-        
+        {/* "/" redirige toujours vers /produits : c'est ProtectedRoute qui décidera */}
+        <Route path="/" element={<Navigate to="/produits" replace />} />
+
+        {/* Routes réservées aux visiteurs non connectés */}
+        <Route element={<GuestRoute />}>
+          <Route path="/login" element={<LoginPage />} />
+        </Route>
+
+        {/* Routes publiques (accessibles depuis le lien du mail) */}
         <Route path="/recovery" element={<RecoveryPage />} />
-        
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-        <Route path="/debug" element={<DebugPage />} />
-
-        <Route path="/produits" element={<ProductsPage />} />
-
-        <Route path="/produits/:slug" element={<ProductPage />} />
-
         {/* Routes privées */}
-        {/* <Route element={<ProtectedRoute />}>
-          <Route path="/produits" element={<ProductsPage />} />
-        </Route> */}
+        <Route element={<ProtectedRoute />}>
+          {/* Pages avec navbar */}
+          <Route element={<AuthenticatedLayout />}>
+            <Route path="/produits" element={<ProductsPage />} />
+            <Route path="/produits/:slug" element={<ProductPage />} />
+          </Route>
+
+          {/* Pages sans navbar */}
+          <Route path="/debug" element={<DebugPage />} />
+        </Route>
 
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

@@ -15,7 +15,7 @@ export default function MobileUserPanel({ isOpen, onClose, userDisplayName, onLo
                 <div className="p-6">
                     {userDisplayName ? (
                         <>
-                            <p className="mb-4 text-sm text-neutral-700">
+                            <p className="mb-4 text-sm text-neutral-700 truncate">
                                 Connecté{userDisplayName ? ` en tant que ${userDisplayName}` : ''}
                             </p>
                             <button

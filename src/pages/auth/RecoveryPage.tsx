@@ -14,6 +14,7 @@ export default function RecoveryPage() {
         status,
         handleRecoveryPassword,
         reset,
+        loading,
     } = useRecoveryPassword();
 
     const current = config[status];
@@ -30,7 +31,7 @@ export default function RecoveryPage() {
                 }
             }}
         >
-            {status === 'default' && (<RecoveryPasswordForm onSubmit={handleRecoveryPassword} />)}
+            {status === 'default' && (<RecoveryPasswordForm onSubmit={handleRecoveryPassword} loading={loading} />)}
 
             {status === 'send' && <RecoveryPasswordSend />}
             

@@ -1,6 +1,4 @@
 import { useLocation, useNavigate, useSearchParams } from "react-router"
-import MainLayout from "../../shared/ui/layouts/MainLayout";
-import { logout } from "../../features/auth/logout"
 import { ProductsGrid } from "../../features/products/components/ProductsGrid";
 import { useProducts } from "../../features/products/hooks/useProducts";
 import { CategoryFilter } from "../../features/products/components/Toolbar/CategoryFilter";
@@ -33,8 +31,7 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [productPendingDeletion, setProductPendingDeletion] = useState<Product | null>(null);
-
-
+  
   const {
     products, category, setCategory,
     sortField, setSortField, sortOrder, setSortOrder,
@@ -68,11 +65,6 @@ export default function ProductsPage() {
   }, []);
 
 
-  const handleLogout = async () => {
-    await logout()
-    navigate('/login')
-  }
-
   function handleProductCreated(product: Product) {
     refetch();
     showFlashMessage(formatProductFlashMessage(product.name, 'ajouté'));
@@ -87,7 +79,7 @@ export default function ProductsPage() {
 
 
   return (
-    <MainLayout userDisplayName="Loris LETIERCE" onLogout={handleLogout}>
+    <>
       <div className="md:h-[90vh] md:overflow-y-auto md:shadow-[inset_0_8px_20px_8px_rgba(0,0,0,0.2)]">
         {/* La barre d'outils n'est plus derrière un `if` — elle est toujours là */}
         <div className="sticky top-0 z-10 border-b border-neutral-200 bg-white p-4 md:p-6 md:pb-4">
@@ -142,6 +134,6 @@ export default function ProductsPage() {
         onDeleted={handleProductDeleted}
       />
       {flashMessage && <Toast message={flashMessage} onDismiss={clearFlashMessage} />}
-    </MainLayout>
+    </>
   )
 }

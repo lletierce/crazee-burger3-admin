@@ -1,10 +1,6 @@
 import React, { useState } from 'react'
-
-import { FcGoogle } from "react-icons/fc";
-import { FaApple, FaFacebook } from 'react-icons/fa';
-import { FaSquareXTwitter } from 'react-icons/fa6';
-import IconWrapper from '../../../shared/ui/IconWrapper';
 import { useLogin } from './use-login';
+import { Link } from 'react-router';
 
 
 export default function LoginForm() {
@@ -14,9 +10,8 @@ export default function LoginForm() {
 
     const {
         handleLogin,
-        moveToRecovery,
         error,
-        loading
+        loading,
     } = useLogin();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -26,13 +21,15 @@ export default function LoginForm() {
 
     return (
         <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-            <div className="flex justify-center gap-6 md:gap-10 px-6 py-4"> {/*bg-white dark:bg-gray-100 shadow-lg rounded-2xl*/}
+            {/* 
+            <div className="flex justify-center gap-6 md:gap-10 px-6 py-4"> 
                 <IconWrapper icon={<FcGoogle />} />
                 <IconWrapper icon={<FaApple />} color="text-black" />
                 <IconWrapper icon={<FaFacebook />} color="text-blue-600" />
                 <IconWrapper icon={<FaSquareXTwitter />} color="text-black" />
             </div>
-            <hr />
+            <hr /> 
+            */}
             {error && <p className="text-red-600">{error}</p>}
             <input
                 type="email"
@@ -53,13 +50,14 @@ export default function LoginForm() {
                 className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
-                className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={loading}
                 type="submit">
-                Connexion
+                {loading ? 'Connexion...' : 'Connexion'}
             </button>
-                <p className="w-fit cursor-pointer text-sm md:hover:underline text-[#f56a2c]" onClick={moveToRecovery}>
+                <Link className="w-fit cursor-pointer text-sm md:hover:underline text-[#f56a2c]" to="/recovery">
                     Vous avez oublié votre mot de passe ?
-                </p>
+                </Link>
             {/* <p className="text-gray-500 text-xs  flex justify-center">Plus d'options de connexion</p> */}
         </form>
     );

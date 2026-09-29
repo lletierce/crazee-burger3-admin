@@ -11,7 +11,7 @@ import { auth } from '../firebase/firebase-config'
 
 interface AuthContextType {
     user: User | null
-    authLoading?: boolean
+    authLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)

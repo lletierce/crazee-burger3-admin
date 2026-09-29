@@ -1,11 +1,9 @@
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../../app/firebase/firebase-config";
 
-export const resetPassword = async (email: string) => {
-
-    const actionCodeSettings = {
-        url: "http://localhost:5173/reset-password",
-        handleCodeInApp: true,
-    };
-    await sendPasswordResetEmail(auth, email, actionCodeSettings);
-}
+export const sendRecoveryEmail = async (email: string) => {
+  await sendPasswordResetEmail(auth, email, {
+    url: `${window.location.origin}/reset-password`,
+    handleCodeInApp: true,
+  });
+};

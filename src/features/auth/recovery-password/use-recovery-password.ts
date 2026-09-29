@@ -1,36 +1,31 @@
 import { useState } from "react";
-import { resetPassword } from "./api-recovery-password";
+import { sendRecoveryEmail } from "./api-recovery-password";
+
+const STATUS = {
+  IDLE: 'default',
+  SEND: 'send',
+  ERROR: 'error',
+} as const;
+
+type QueryStatus = (typeof STATUS)[keyof typeof STATUS];
 
 export function useRecoveryPassword() {
+  const [status, setStatus] = useState<QueryStatus>(STATUS.IDLE);
+  const [loading, setLoading] = useState(false);
 
-    const STATUS = {
-        IDLE: 'default',
-        SEND: 'send',
-        ERROR: 'error',
-    } as const;
-    // type QueryStatus = 'default' | 'send' | 'error';
-    type QueryStatus = (typeof STATUS)[keyof typeof STATUS];
+  const handleRecoveryPassword = async (email: string) => {
+    setLoading(true);
+    try {
+      await sendRecoveryEmail(email);
+      setStatus(STATUS.SEND);
+    } catch {
+      setStatus(STATUS.ERROR);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const [status, setStatus] = useState<QueryStatus>(STATUS.IDLE);
+  const reset = () => setStatus(STATUS.IDLE);
 
-    const handleRecoveryPassword = async (email: string) => {
-        try {
-            await resetPassword(email);
-            setStatus(STATUS.SEND);
-
-        } 
-        catch (error) {
-            setStatus(STATUS.ERROR);
-        }
-    };
-
-    const reset = () => {
-        setStatus(STATUS.IDLE);
-    };
-
-    return {
-        status,
-        handleRecoveryPassword,
-        reset,
-    };
+  return { status, loading, handleRecoveryPassword, reset };
 }
