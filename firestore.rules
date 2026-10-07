@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Niveau 2 : l'utilisateur connecté figure-t-il dans la collection "admins" ?
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Niveau 3 : le produit (tel qu'il sera APRÈS l'écriture) est-il valide ?
+    function isValidProduct(data) {
+      return data.keys().hasOnly(['name', 'category', 'price', 'quantity', 'imageUrl',
+                                  'slug', 'createdAt', 'lastUpdated', 'isAvailable', 'isPromoted'])
+        && data.keys().hasAll(['name', 'category', 'price', 'quantity',
+                               'slug', 'createdAt', 'lastUpdated', 'isAvailable', 'isPromoted'])
+        && data.name is string && data.name.size() >= 2 && data.name.size() <= 80
+        && data.category in ['Burger', 'Boisson', 'Supplément']
+        && data.price is number && data.price >= 0
+        && data.quantity is int && data.quantity >= 0
+        && data.slug is string && data.slug.size() > 0
+        && data.createdAt is timestamp
+        && data.lastUpdated is timestamp
+        && data.isAvailable is bool
+        && data.isPromoted is bool
+        && (!('imageUrl' in data) || data.imageUrl is string);
+    }
+
+    match /products/{productId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidProduct(request.resource.data);
+      allow update: if isAdmin() && isValidProduct(request.resource.data)
+                    && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin();
+    }
+
+    // La liste des admins ne se gère QUE depuis la console
+    match /admins/{uid} {
+      allow read, write: if false;
+    }
+  }
+}
