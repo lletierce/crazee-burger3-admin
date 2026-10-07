@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { LuPencil, LuTrash2 } from 'react-icons/lu';
 import { useProduct } from '../../features/products/hooks/useProduct';
-import MainLayout from '../../shared/ui/layouts/MainLayout';
 import { ProductPageSkeleton } from '../../features/products/components/ProductPageSkeleton';
 import NotFoundPage from '../error/NotFoundPage';
 import { Breadcrumbs } from '../../shared/ui/components/Breadcrumbs';
@@ -22,6 +21,7 @@ export function ProductPage() {
   const location = useLocation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
 
   const { message: flashMessage, show: showFlashMessage, clear: clearFlashMessage } = useFlashMessage(
     () => (location.state as { flashMessage?: string } | null)?.flashMessage ?? null,
@@ -71,7 +71,7 @@ export function ProductPage() {
   }
 
   return (
-    <MainLayout userDisplayName="Loris LETIERCE" onLogout={() => { }}>
+    <>
       <div className="md:min-h-[90vh] p-4 md:p-6">
         {isLoading && <ProductPageSkeleton />}
 
@@ -209,6 +209,6 @@ export function ProductPage() {
           </>
         )}
       </div>
-    </MainLayout>
+    </>
   );
 }

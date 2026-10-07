@@ -81,6 +81,10 @@ export function useProducts({
    */
   const fetchFirstPage = useCallback(() => {
     const requestId = ++requestIdRef.current;
+
+    // Chargement de données : les setState "loading/error" au début de
+    // fetchProduct sont volontaires. Refacto prévue : TanStack Query.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     setError(null);
 
@@ -112,6 +116,9 @@ export function useProducts({
     if (isLoading || isLoadingMore || !hasMore) return;
 
     const requestId = ++requestIdRef.current;
+    // Chargement de données : les setState "loading/error" au début de
+    // fetchProduct sont volontaires. Refacto prévue : TanStack Query.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoadingMore(true);
     setError(null);
 

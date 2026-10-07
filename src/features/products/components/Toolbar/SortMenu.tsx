@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { LuArrowUpDown } from 'react-icons/lu';
 import { useClickOutside } from '../../../../shared/hooks/useClickOutside';
-import { PRODUCT_SORT_FIELDS, type ProductSortField } from '../../types/product.types';
+import { PRODUCT_SORT_FIELDS, SORT_FIELD_LABELS, type ProductSortField } from '../../types/product.types';
 import { MenuOption } from './MenuOption';
 
 interface SortMenuProps {
@@ -9,17 +9,7 @@ interface SortMenuProps {
   onChange: (field: ProductSortField) => void;
 }
 
-/**
- * French labels for each sort field. Exported so the toolbar (or
- * anything else that needs to display "currently sorted by X" as text)
- * can reuse the same mapping instead of re-deriving it.
- */
-export const SORT_FIELD_LABELS: Record<ProductSortField, string> = {
-  name: 'Nom',
-  price: 'Prix',
-  quantity: 'Quantité',
-  createdAt: 'Date de création',
-};
+
 
 /**
  * Once you've built one accessible single-select dropdown
