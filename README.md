@@ -2,7 +2,7 @@
 
 > Application web de gestion de menu pour restaurant : les administrateurs gèrent leurs produits en temps réel (ajout, modification, suppression, disponibilité, mise en avant).
 
-🔗 **Démo en ligne : [https://https://crazee-burger-dev-adm.firebaseapp.com/](https://https://crazee-burger-dev-adm.firebaseapp.com/)**
+🔗 **Démo en ligne : [https://crazee-burger-dev-adm.firebaseapp.com/](https://crazee-burger-dev-adm.firebaseapp.com/)**
 
 ![Aperçu de l'application](./docs/wip_screenshot.jpg)
 
@@ -80,8 +80,8 @@ Je l'ai ensuite **repris et fait évoluer seul** :
 
 ```bash
 # 1. Cloner le dépôt
-git clone https://github.com/[ton-pseudo]/[nom-du-repo].git
-cd [nom-du-repo]
+git clone https://github.com/lletierce/crazee-burger3-admin.git
+cd crazee-burger3-admin
 
 # 2. Installer les dépendances
 npm install
