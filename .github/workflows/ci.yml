@@ -1,0 +1,45 @@
+name: CI
+
+# Quand la pipeline se déclenche
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Lint, typecheck, tests et build
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupère le code du dépôt
+      - name: Checkout du code
+        uses: actions/checkout@v5
+
+      # 2. Installe Node.js (avec cache des dépendances npm)
+      - name: Installation de Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: lts/*
+          cache: npm
+
+      # 3. Installe les dépendances exactement comme dans package-lock.json
+      - name: Installation des dépendances
+        run: npm ci
+
+      # 4. Vérifie la qualité du code
+      - name: Lint
+        run: npm run lint
+
+      # 5. Vérifie les types TypeScript
+      - name: Typecheck
+        run: npm run typecheck
+
+      # 6. Lance les tests une seule fois (pas en mode surveillance)
+      - name: Tests
+        run: npm run test:run
+
+      # 7. Vérifie que l'application se construit sans erreur
+      - name: Build
+        run: npm run build
