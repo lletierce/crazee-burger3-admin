@@ -46,12 +46,41 @@ export function useProducts({
   const [sortField, setSortField] = useState<ProductSortField>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
+  /**
+   * Incremented by `refetch` to force a reload of page one even when the
+   * filter/sort haven't changed (e.g. after a product creation).
+   */
+  const [refreshToken, setRefreshToken] = useState(0);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [cursor, setCursor] = useState<ProductsPageCursor>(null);
   const [hasMore, setHasMore] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+
+  /**
+   * Identifies "page one under the current filter/sort". Every input that
+   * should trigger a fresh page-one load is part of this key.
+   */
+  const queryKey = `${category ?? 'all'}|${sortField}|${sortOrder}|${pageSize}|${refreshToken}`;
+
+  /**
+   * Why `isLoading` is DERIVED instead of stored: the effect below must not
+   * call setState synchronously (react-hooks/set-state-in-effect — it causes
+   * an extra cascading render). So instead of "setIsLoading(true) when a
+   * request starts", we remember which key the last COMPLETED request was
+   * for. If it doesn't match the current key, a request for the current
+   * key is still in flight → we're loading. Initially null → loading.
+   */
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const isLoading = loadedKey !== queryKey;
+
+  /**
+   * Same idea for the error: it's tagged with the key it belongs to, so an
+   * error from a previous filter disappears as soon as the filter changes,
+   * without having to reset it synchronously in the effect.
+   */
+  const [errorState, setErrorState] = useState<{ key: string; error: Error } | null>(null);
+  const error = errorState?.key === queryKey ? errorState.error : null;
 
   /**
    * The race condition this guards against: the Firestore web SDK's
@@ -65,50 +94,45 @@ export function useProducts({
    * The fix: every fetch stamps itself with the current value of this
    * ref before starting, and only applies its result if that value
    * hasn't changed by the time it resolves. One counter covers every
-   * source of a new request (filter change, sort change, AND loadMore),
-   * because every one of them increments it.
+   * source of a new request (filter change, sort change, refetch AND
+   * loadMore), because every one of them increments it.
    */
   const requestIdRef = useRef(0);
 
-  /**
-   * Extracted into its own `useCallback`, not left inline inside the
-   * `useEffect`, because it now has TWO callers: the effect (runs
-   * automatically when filter/sort change) and `refetch` (called
-   * manually — right now, only after a successful product creation, so
-   * the new product shows up without the user reloading the page). Same
-   * function either way — "load page one under the current filter/sort"
-   * doesn't change meaning depending on who asked for it.
-   */
-  const fetchFirstPage = useCallback(() => {
+  // Load page one whenever the filter, sort or refresh token changes.
+  // Every setState below happens in an async callback, never synchronously.
+  useEffect(() => {
     const requestId = ++requestIdRef.current;
 
-    // Chargement de données : les setState "loading/error" au début de
-    // fetchProduct sont volontaires. Refacto prévue : TanStack Query.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsLoading(true);
-    setError(null);
-
-    return fetchProductsPage({ category: category ?? undefined, sortField, sortOrder, pageSize })
+    fetchProductsPage({ category: category ?? undefined, sortField, sortOrder, pageSize })
       .then(({ products: page, nextCursor, hasMore: more }) => {
         if (requestId !== requestIdRef.current) return; // superseded — ignore
         setProducts(page);
         setCursor(nextCursor);
         setHasMore(more);
+        setErrorState(null);
       })
       .catch((err: unknown) => {
         if (requestId !== requestIdRef.current) return;
-        setError(err instanceof Error ? err : new Error('Impossible de charger les produits.'));
+        setErrorState({
+          key: queryKey,
+          error: err instanceof Error ? err : new Error('Impossible de charger les produits.'),
+        });
       })
       .finally(() => {
         if (requestId !== requestIdRef.current) return;
-        setIsLoading(false);
+        setLoadedKey(queryKey);
       });
-  }, [category, sortField, sortOrder, pageSize]);
+  }, [category, sortField, sortOrder, pageSize, queryKey]);
 
-  // Reset + refetch page one whenever the filter or sort changes.
-  useEffect(() => {
-    fetchFirstPage();
-  }, [fetchFirstPage]);
+  /**
+   * Called from event handlers only (e.g. after a successful product
+   * creation, so the new product shows up without the user reloading the
+   * page). Changing the token changes `queryKey`, which re-runs the effect.
+   */
+  const refetch = useCallback(() => {
+    setRefreshToken((token) => token + 1);
+  }, []);
 
   const loadMore = useCallback(() => {
     // Guards against a double click firing two overlapping requests, and
@@ -116,11 +140,7 @@ export function useProducts({
     if (isLoading || isLoadingMore || !hasMore) return;
 
     const requestId = ++requestIdRef.current;
-    // Chargement de données : les setState "loading/error" au début de
-    // fetchProduct sont volontaires. Refacto prévue : TanStack Query.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoadingMore(true);
-    setError(null);
 
     fetchProductsPage({ category: category ?? undefined, sortField, sortOrder, cursor, pageSize })
       .then(({ products: page, nextCursor, hasMore: more }) => {
@@ -128,16 +148,23 @@ export function useProducts({
         setProducts((current) => [...current, ...page]);
         setCursor(nextCursor);
         setHasMore(more);
+        setErrorState(null);
       })
       .catch((err: unknown) => {
         if (requestId !== requestIdRef.current) return;
-        setError(err instanceof Error ? err : new Error('Impossible de charger la suite.'));
+        setErrorState({
+          key: queryKey,
+          error: err instanceof Error ? err : new Error('Impossible de charger la suite.'),
+        });
       })
       .finally(() => {
-        if (requestId !== requestIdRef.current) return;
+        // Always reset, even if this request was superseded: otherwise a
+        // filter change during "voir plus" would leave the button stuck in
+        // its loading state forever (loadMore can't overlap with itself,
+        // so there's no newer loadMore whose flag we could clobber).
         setIsLoadingMore(false);
       });
-  }, [category, sortField, sortOrder, cursor, hasMore, isLoading, isLoadingMore, pageSize]);
+  }, [category, sortField, sortOrder, cursor, hasMore, isLoading, isLoadingMore, pageSize, queryKey]);
 
   /**
    * Unlike `refetch` (a full page-one reload, needed after a creation
@@ -165,6 +192,6 @@ export function useProducts({
     sortOrder,
     setSortOrder,
     removeProduct,
-    refetch: fetchFirstPage,
+    refetch,
   };
 }

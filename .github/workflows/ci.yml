@@ -1,5 +1,7 @@
 name: CI
 
+# A faire en local avant : npm run lint && npm run typecheck && npm run test:run
+
 # Quand la pipeline se déclenche
 on:
   push:
