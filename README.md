@@ -1,8 +1,8 @@
 # 🍔 [Crazee-burger-adm]
-
+[![CI/CD](https://github.com/lletierce/crazee-burger3-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/lletierce/crazee-burger3-admin/actions/workflows/ci.yml)
 > Application web de gestion de menu pour restaurant : les administrateurs gèrent leurs produits en temps réel (ajout, modification, suppression, disponibilité, mise en avant).
 
-🔗 **Démo en ligne : [https://crazee-burger-dev-adm.firebaseapp.com/](https://crazee-burger-dev-adm.firebaseapp.com/)**
+🔗 **Démo en ligne : [https://crazee-burger-dev-adm.web.app/](https://crazee-burger-dev-adm.web.app/)**
 
 ![Aperçu de l'application](./docs/wip_screenshot.jpg)
 
