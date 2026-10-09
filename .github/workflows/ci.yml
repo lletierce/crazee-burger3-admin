@@ -1,6 +1,6 @@
-name: CI
+name: CI/CD
 
-# A faire en local avant : npm run lint && npm run typecheck && npm run test:run
+# À faire en local avant : npm run lint && npm run typecheck && npm run test:run
 
 # Quand la pipeline se déclenche
 on:
@@ -10,6 +10,9 @@ on:
     branches: [main]
 
 jobs:
+  # ─────────────────────────────────────────────────────────────
+  # 1. CI : vérifie le code et construit l'application (une seule fois)
+  # ─────────────────────────────────────────────────────────────
   quality:
     name: Lint, typecheck, tests et build
     runs-on: ubuntu-latest
@@ -42,6 +45,94 @@ jobs:
       - name: Tests
         run: npm run test:run
 
-      # 7. Vérifie que l'application se construit sans erreur
+      # 7. Construit l'application.
+      # Vite intègre les variables VITE_* AU MOMENT DU BUILD : sans elles,
+      # le site déployé ne saurait pas à quel projet Firebase se connecter.
+      # Elles remplacent le fichier .env, qui n'est pas sur GitHub.
       - name: Build
         run: npm run build
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+
+      # 8. Conserve le dossier dist/ pour les jobs de déploiement.
+      # Principe "build once, deploy many" : on déploie EXACTEMENT
+      # ce qui a été testé, sans reconstruire.
+      - name: Sauvegarde du build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────
+  # 2. CD (Pull Request) : déploie une prévisualisation temporaire
+  #    et publie son URL en commentaire de la PR
+  # ─────────────────────────────────────────────────────────────
+  deploy-preview:
+    name: Déploiement de prévisualisation
+    needs: quality # ne s'exécute que si la CI est verte
+    # Uniquement pour les PR venant de ce dépôt (les forks n'ont pas accès aux secrets)
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write # pour commenter la PR avec l'URL
+
+    steps:
+      # firebase.json et .firebaserc sont nécessaires pour déployer
+      - name: Checkout du code
+        uses: actions/checkout@v5
+
+      - name: Récupération du build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Déploiement sur un canal de prévisualisation
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAZEE_BURGER_DEV_ADM }}
+          projectId: crazee-burger-dev-adm
+          expires: 7d
+
+  # ─────────────────────────────────────────────────────────────
+  # 3. CD (production) : déploie le site en ligne à chaque push sur main
+  # ─────────────────────────────────────────────────────────────
+  deploy-production:
+    name: Déploiement en production
+    needs: quality # ne s'exécute que si la CI est verte
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # Deux déploiements ne tournent jamais en même temps ;
+    # le suivant attend que le précédent soit terminé.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v5
+
+      - name: Récupération du build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Déploiement sur le site en ligne
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CRAZEE_BURGER_DEV_ADM }}
+          projectId: crazee-burger-dev-adm
+          channelId: live
