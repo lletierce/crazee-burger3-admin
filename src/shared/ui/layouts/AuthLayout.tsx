@@ -1,6 +1,12 @@
+import { useState } from "react";
 import MinimalistActionBtn from "../buttons/MinimalistActionBtn";
 import Logo from "../logos/Logo";
 
+
+const BACKGROUND_SRC = "/images/burger-and-fries-background.webp";
+
+/** GIF transparent 1×1 encodé en base64 directement : `src` de repli pour <img> quand le `media` ne correspond pas (mobile). */
+const TRANSPARENT_PIXEL = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 type AuthLayoutProps = {
     children: React.ReactNode;
@@ -24,6 +30,8 @@ export default function AuthLayout({
 
 }: AuthLayoutProps) {
 
+    const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
+
     const renderTitle = () => {
         return titleVariant === "skeleton" ? (
             <div className="my-6 h-12 w-full rounded bg-gray-200 animate-pulse" />
@@ -34,15 +42,39 @@ export default function AuthLayout({
 
     return (
         <div className="
-            min-h-screen 
-            flex 
-            justify-center 
+            relative
+            min-h-screen
+            flex
+            justify-center
             bg-[#f5f5f7]
-            md:bg-[linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url('/images/burger-and-fries-background.jpg')]
-            bg-cover 
-            bg-center
+            md:bg-[#1c1209]
         ">
+            {/* Fond décoratif (desktop) : image + voile sombre + transition */}
+            <div aria-hidden="true" className="absolute inset-0 hidden overflow-hidden md:block">
+                <picture className="block h-full w-full">
+                    <source media="(min-width: 48rem)" srcSet={BACKGROUND_SRC} type="image/webp" />
+                    <img
+                        src={TRANSPARENT_PIXEL}
+                        alt=""
+                        fetchPriority="high"
+                        decoding="async"
+                        onLoad={() => setIsBackgroundLoaded(true)}
+                        className={`
+                            h-full
+                            w-full
+                            object-cover
+                            transition-opacity
+                            duration-700
+                            motion-reduce:transition-none
+                            ${isBackgroundLoaded ? "opacity-100" : "opacity-0"}
+                        `}
+                    />
+                </picture>
+                <div className="absolute inset-0 bg-black/70" />
+            </div>
+
             <div className="
+                relative
                 w-full
                 max-w-md
                 bg-[#f5f5f7]
@@ -50,7 +82,7 @@ export default function AuthLayout({
                 shadow-xl
                 md:mt-36
                 md:h-min
-                md:rounded-2xl  
+                md:rounded-2xl
             ">
                 {/* Bouton optionnel */}
                 {actionButton && (
@@ -59,7 +91,7 @@ export default function AuthLayout({
                         onClick={actionButton.onClick}
                     />
                 )}
-                
+
                 {/* Logo */}
                 <Logo variant={logoVariant} />
 
@@ -67,6 +99,7 @@ export default function AuthLayout({
                 {renderTitle()}
 
                 {/* Contenu de la page */}
+                {/* Le composant enfant n'attend pas l'image : il est utilisable immédiatement. */}
                 {children}
             </div>
         </div>
