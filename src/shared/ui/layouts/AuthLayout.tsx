@@ -1,5 +1,6 @@
 import MinimalistActionBtn from "../buttons/MinimalistActionBtn";
 import Logo from "../logos/Logo";
+import PageBackground from "./PageBackground";
 
 
 type AuthLayoutProps = {
@@ -34,15 +35,16 @@ export default function AuthLayout({
 
     return (
         <div className="
-            min-h-screen 
-            flex 
-            justify-center 
+            min-h-screen
+            flex
+            justify-center
             bg-[#f5f5f7]
-            md:bg-[linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.7)),url('/images/burger-and-fries-background.jpg')]
-            bg-cover 
-            bg-center
         ">
+            {/* Fond décoratif (desktop) */}
+            <PageBackground />
+
             <div className="
+                relative
                 w-full
                 max-w-md
                 bg-[#f5f5f7]
@@ -50,7 +52,7 @@ export default function AuthLayout({
                 shadow-xl
                 md:mt-36
                 md:h-min
-                md:rounded-2xl  
+                md:rounded-2xl
             ">
                 {/* Bouton optionnel */}
                 {actionButton && (
@@ -59,7 +61,7 @@ export default function AuthLayout({
                         onClick={actionButton.onClick}
                     />
                 )}
-                
+
                 {/* Logo */}
                 <Logo variant={logoVariant} />
 
@@ -67,6 +69,7 @@ export default function AuthLayout({
                 {renderTitle()}
 
                 {/* Contenu de la page */}
+                {/* Le composant enfant n'attend pas l'image : il est utilisable immédiatement. */}
                 {children}
             </div>
         </div>
