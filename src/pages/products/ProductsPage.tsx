@@ -104,7 +104,7 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        <div className="p-4 md:p-6 md:pt-0">
+        <div className="p-4 md:p-6">
           {/* Seule cette zone change de contenu selon l'état */}
           {isLoading ? (
             <ProductsGridSkeleton />
