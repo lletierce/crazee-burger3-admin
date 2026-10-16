@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useLogin } from './use-login';
 import { Link } from 'react-router';
+import PasswordInput from '../../../shared/ui/form/PasswordInput';
 
 
 export default function LoginForm() {
@@ -37,15 +38,16 @@ export default function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="Email"
+                autoComplete="email"
                 maxLength={50}
                 className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
-                type="password"
+            <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Mot de passe"
+                autoComplete="current-password"
                 maxLength={30}
                 className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
