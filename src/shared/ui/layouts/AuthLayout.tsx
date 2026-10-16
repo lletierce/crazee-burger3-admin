@@ -1,3 +1,4 @@
+import { LuChevronLeft } from "react-icons/lu";
 import MinimalistActionBtn from "../buttons/MinimalistActionBtn";
 import Logo from "../logos/Logo";
 import PageBackground from "./PageBackground";
@@ -54,11 +55,13 @@ export default function AuthLayout({
                 md:h-min
                 md:rounded-2xl
             ">
-                {/* Bouton optionnel */}
+                {/* Bouton optionnel : en haut à gauche de la carte, hors du flux, pour ne pas décaler le logo ni agrandir la carte */}
                 {actionButton && (
                     <MinimalistActionBtn
                         label={actionButton.label}
                         onClick={actionButton.onClick}
+                        icon={<LuChevronLeft size={18} />}
+                        className="absolute left-4 top-4"
                     />
                 )}
 
