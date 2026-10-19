@@ -3,6 +3,7 @@ import { useNavbarState } from "./hooks/useNavbarState";
 import DesktopNav from "./DesktopNav";
 import MobileMenuPanel from "./MobileMenuPanel";
 import MobileUserPanel from "./MobileUserPanel";
+import NavbarBrand from "./NavbarBrand";
 
 export interface NavbarProps {
     userDisplayName?: string;
@@ -30,7 +31,8 @@ export default function Navbar( { userDisplayName, onLogout }: NavbarProps ) {
                     </div>
 
                     <div className="flex justify-center">
-                        <div className="h-9 w-9 rounded bg-emerald-800" />
+                        {/* Mobile : logo seul, le nom ne tient pas entre les deux icônes */}
+                        <NavbarBrand showName={false} onClick={closeAll} />
                     </div>
 
                     <div className="flex justify-end">
@@ -47,7 +49,9 @@ export default function Navbar( { userDisplayName, onLogout }: NavbarProps ) {
 
                 {/* --- Desktop layout: logo | links | logout --- */}
                 <div className="hidden w-full items-center md:flex" >
-                    <div className="mr-8 h-9 w-9 shrink-0 rounded bg-emerald-800" />
+                    <div className="mr-8 shrink-0">
+                        <NavbarBrand />
+                    </div>
                     <DesktopNav onLogout={onLogout} />
                 </div>
             </div>
