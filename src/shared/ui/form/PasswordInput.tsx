@@ -39,7 +39,6 @@ export default function PasswordInput({ className = "", ...inputProps }: Passwor
                     -translate-y-1/2
                     rounded-md
                     p-1.5
-                    cursor-pointer
                     transition-colors
                     focus:outline-none
                     focus-visible:ring-2

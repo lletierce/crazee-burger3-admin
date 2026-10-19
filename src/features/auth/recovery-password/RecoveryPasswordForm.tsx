@@ -28,7 +28,7 @@ export default function RecoveryPasswordForm({ onSubmit, loading }: RecoveryPass
                 className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
-                className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
                 type="submit"
                 disabled={loading}
             >

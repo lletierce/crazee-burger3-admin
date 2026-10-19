@@ -24,7 +24,7 @@ export default function MobileUserPanel({ isOpen, onClose, userDisplayName, onLo
                                     onLogout();
                                     onClose();
                                 }}
-                                className="w-full rounded-md bg-amber-400 py-3 text-sm font-medium text-neutral-900 hover:bg-amber-500 cursor-pointer"
+                                className="w-full rounded-md bg-amber-400 py-3 text-sm font-medium text-neutral-900 hover:bg-amber-500"
                             >
                                 Se déconnecter
                             </button>
