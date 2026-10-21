@@ -1,6 +1,7 @@
 import { LuX } from "react-icons/lu";
 import { primaryNavItems, secondaryActions } from "./navigation.config";
 import { useBodyScrollLock } from "../../hooks/useBodyScrollLock";
+import NavbarBrand from "./NavbarBrand";
 
 interface MobileMenuPanelProps {
     isOpen: boolean;
@@ -29,7 +30,7 @@ export default function MobileMenuPanel({ isOpen, onClose }: MobileMenuPanelProp
                     }`}
             >
                 <div className="mb-8 flex items-center justify-between">
-                    <div className="h-9 w-9 rounded bg-emerald-800" />
+                    <NavbarBrand onClick={onClose} />
                     <button type="button" onClick={onClose} aria-label="Fermer le menu">
                         <LuX size={24} />
                     </button>
@@ -65,13 +66,6 @@ export default function MobileMenuPanel({ isOpen, onClose }: MobileMenuPanelProp
                     })}
                 </ul>
 
-                <a
-                    href="/commander"
-                    onClick={onClose}
-                    className="mt-8 rounded-md bg-amber-400 py-3 text-center text-sm font-medium text-neutral-900 hover:bg-amber-500"
-                >
-                    Commander
-                </a>
             </div>
         </>
     );

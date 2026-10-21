@@ -25,7 +25,7 @@ export function AddProductButton({ onClick }: AddProductButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="ml-auto flex items-center gap-2 rounded-md bg-amber-400 px-4 py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-500 cursor-pointer"
+      className="ml-auto flex items-center gap-2 rounded-md bg-amber-400 px-4 py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-500"
     >
       <LuPlus size={16} />
       Ajouter

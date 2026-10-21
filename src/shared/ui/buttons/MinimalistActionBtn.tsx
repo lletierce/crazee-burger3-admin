@@ -41,7 +41,6 @@ export default function MinimalistActionBtn({
                 text-sm
                 font-medium
                 text-neutral-600
-                cursor-pointer
                 transition-colors
                 hover:bg-neutral-200/70
                 hover:text-neutral-900

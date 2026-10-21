@@ -1,6 +1,4 @@
 import { BiSolidCheckCircle, BiSolidErrorCircle } from "react-icons/bi";
-import logo from "/images/logo-orange.png";
-
 
 type LogoVariant =
     | 'default'
@@ -14,6 +12,8 @@ type LogoProps = {
 
 const containerClass =
     "flex items-center justify-center text-center";
+
+const LOGO_SRC = "/images/logo-orange.png";
 
 
 export default function Logo({ variant = "default" }: LogoProps) {
@@ -49,7 +49,7 @@ export default function Logo({ variant = "default" }: LogoProps) {
             return (
                 <div className={containerClass}>
                     <img
-                        src={logo}
+                        src={LOGO_SRC}
                         alt="Logo de l'application"
                         className="h-20 object-contain md:h-25"
                     />
