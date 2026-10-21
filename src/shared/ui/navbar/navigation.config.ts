@@ -1,7 +1,7 @@
 import type { NavItem, SecondaryAction } from './navbar.types';
 
 export const primaryNavItems: NavItem[] = [
-  { label: 'Produits', href: '/nos-produits' },
+  { label: 'Produits', href: '/produits' },
 ];
 
 export const secondaryActions: SecondaryAction[] = [

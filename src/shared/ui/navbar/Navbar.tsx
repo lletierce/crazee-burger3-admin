@@ -52,7 +52,7 @@ export default function Navbar( { userDisplayName, onLogout }: NavbarProps ) {
                     <div className="mr-8 shrink-0">
                         <NavbarBrand />
                     </div>
-                    <DesktopNav onLogout={onLogout} />
+                    <DesktopNav userDisplayName={userDisplayName} onLogout={onLogout} />
                 </div>
             </div>
 
