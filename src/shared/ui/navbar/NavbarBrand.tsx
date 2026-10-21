@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import logo from "/images/logo-orange.png";
 
 interface NavbarBrandProps {
     /** Affiche le nom « Crazee Burger » à côté du logo (masqué là où la place manque). */
@@ -7,6 +6,8 @@ interface NavbarBrandProps {
     /** Permet de fermer un menu mobile ouvert au clic. */
     onClick?: () => void;
 }
+
+const LOGO_SRC = "/images/logo-orange.png";
 
 /**
  * Logo de l'app dans la barre de navigation, cliquable vers la page d'accueil
@@ -26,7 +27,7 @@ export default function NavbarBrand({ showName = true, onClick }: NavbarBrandPro
             className="flex shrink-0 items-center gap-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-primary"
         >
             <img
-                src={logo}
+                src={LOGO_SRC}
                 alt="Crazee Burger, accueil"
                 width={599}
                 height={417}
