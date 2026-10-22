@@ -7,6 +7,8 @@ import { ProductPage } from "../../pages/products/ProductPage";
 import GuestRoute from "./GuestRoute";
 import ProtectedRoute from "./ProtectedRoute";
 import AuthenticatedLayout from "../layouts/AuthenticatedLayout";
+import LoginPageSkeleton from "../../pages/auth/LoginPageSkeleton";
+import AuthenticatedLayoutSkeleton from "../layouts/AuthenticatedLayoutSkeleton";
 
 export default function AppRouter() {
 
@@ -17,7 +19,7 @@ export default function AppRouter() {
         <Route path="/" element={<Navigate to="/produits" replace />} />
 
         {/* Routes réservées aux visiteurs non connectés */}
-        <Route element={<GuestRoute />}>
+        <Route element={<GuestRoute fallback={<LoginPageSkeleton />} />}>
           <Route path="/login" element={<LoginPage />} />
         </Route>
 
@@ -25,7 +27,7 @@ export default function AppRouter() {
         <Route path="/recovery" element={<RecoveryPage />} />
 
         {/* Routes privées */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute fallback={<AuthenticatedLayoutSkeleton />} />}>
           {/* Pages avec navbar */}
           <Route element={<AuthenticatedLayout />}>
             <Route path="/produits" element={<ProductsPage />} />

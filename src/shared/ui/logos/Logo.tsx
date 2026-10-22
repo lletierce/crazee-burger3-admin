@@ -57,17 +57,3 @@ export default function Logo({ variant = "default" }: LogoProps) {
             );
     }
 }
-
-
-
-/*
- <div
-            className={`flex items-center justify-center pt-4 ${className}`}
-        >
-            <img
-                src={logo}
-                alt="Logo de l'application"
-                className="h-20 object-contain md:h-25"
-            />
-        </div>
-*/
