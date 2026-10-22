@@ -5,6 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <link href="/src/App.css" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+
+    <!--
+      Couleur du tout premier affichage, avant le chargement du CSS et de React.
+      Sans elle, le navigateur affiche une page blanche pendant le chargement,
+      puis React peint le fond sombre d'un coup : un « flash » blanc au rafraîchissement.
+      Ces couleurs doivent rester alignées sur le fond des pages
+      (#f5f5f7 sur mobile, #1c1209 sur desktop : voir AuthLayout et PageBackground).
+    -->
+    <style>
+      html { background-color: #f5f5f7; }
+      @media (min-width: 48rem) {
+        html { background-color: #1c1209; }
+      }
+    </style>
     <title>crazee-burger-adm</title>
   </head>
   <body>
