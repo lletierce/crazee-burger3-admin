@@ -1,10 +1,12 @@
-# 🍔 [Crazee-burger-adm]
+# 🍔 Crazee Burger — Back-office
+
 [![CI/CD](https://github.com/lletierce/crazee-burger3-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/lletierce/crazee-burger3-admin/actions/workflows/ci.yml)
-> Application web de gestion de menu pour restaurant : les administrateurs gèrent leurs produits en temps réel (ajout, modification, suppression, disponibilité, mise en avant).
 
-🔗 **Démo en ligne : [https://crazee-burger-dev-adm.web.app/](https://crazee-burger-dev-adm.web.app/)**
+> Back-office de gestion de menu pour restaurant : les administrateurs gèrent le catalogue de produits (ajout, modification, suppression, disponibilité, mise en avant).
 
-![Aperçu de l'application](./docs/wip_screenshot.jpg)
+🔗 **Démo en ligne : [crazee-burger-dev-adm.web.app](https://crazee-burger-dev-adm.web.app/)**
+
+![Démo : connexion puis ajout d'un produit au menu](./docs/cbadm-add-product.gif)
 
 ---
 
@@ -22,12 +24,12 @@ Un compte de démonstration est disponible :
 
 ## ✨ Fonctionnalités
 
-- **Authentification** : inscription, connexion, déconnexion, réinitialisation du mot de passe par email
-- **Gestion des produits (CRUD)** : ajout, modification et suppression de produits
-- **Synchronisation en temps réel** avec Firestore
-- **Gestion de la disponibilité** (produit en stock / épuisé) et **mise en avant** de produits
-- **Catégories** : Burger, Boisson, Supplément
-- **Design responsive** : utilisable sur mobile, tablette et ordinateur
+- **Authentification** : connexion, déconnexion, réinitialisation du mot de passe par email, affichage du mot de passe à la saisie
+- **Gestion des produits (CRUD)** : ajout, modification et suppression, avec confirmation et notifications
+- **Catalogue** : filtre par catégorie (Burger, Boisson, Supplément), tri (nom, prix, quantité, date de création), recherche, **défilement infini**
+- **Fiche produit** dédiée, avec fil d'Ariane
+- **Disponibilité** (en stock / épuisé) et **mise en avant** de produits
+- **Design responsive** : mobile, tablette et ordinateur
 - **Accès sécurisé** : seuls les administrateurs peuvent consulter et modifier le menu
 
 ---
@@ -36,11 +38,45 @@ Un compte de démonstration est disponible :
 
 | Domaine | Technologies |
 |---|---|
-| Front-end | React, TypeScript, Vite |
-| Style | Tailwind CSS |
-| Navigation | React Router |
+| Front-end | React 19, TypeScript, Vite |
+| Style | Tailwind CSS 4 |
+| Navigation | React Router 7 |
 | Back-end (BaaS) | Firebase Authentication, Cloud Firestore |
-| Hébergement | Firebase Hosting |
+| Tests | Vitest, React Testing Library |
+| CI/CD | GitHub Actions, Firebase Hosting |
+
+---
+
+## 🧩 Choix techniques
+
+### Architecture par features
+
+Le code est organisé par domaine métier plutôt que par type de fichier :
+
+```
+src/
+├── app/        # Assemblage de l'application : routage, layouts, providers, config Firebase
+├── features/   # Logique métier par domaine (auth, products) : API, hooks, composants, types
+├── pages/      # Pages, qui composent les features
+└── shared/     # Code réutilisable sans logique métier : UI, hooks, utilitaires
+```
+
+Les tests sont placés à côté des fichiers qu'ils testent (`Composant.test.tsx`).
+
+### Pagination Firestore et défilement infini
+
+Les produits sont chargés **par pages de 20**, avec une pagination par curseurs (`startAfter`) plutôt que par numéro de page : chaque requête reprend exactement après le dernier produit reçu. La page suivante se charge automatiquement quand l'utilisateur arrive en bas de la liste (`IntersectionObserver`), et le filtre, le tri et la recherche relancent la pagination depuis le début.
+
+### Expérience de chargement
+
+- **Skeletons** qui reproduisent la forme exacte de la page (navbar, barre d'outils, grille), pour que rien ne « saute » quand le contenu arrive.
+- **Délai de 300 ms** avant d'afficher un skeleton : une attente courte passe directement à la page, sans loader qui clignote (hook `useDelayedFlag`).
+- **Couleur de fond définie dès le HTML** : pas de flash blanc avant le démarrage de React.
+- **Image de fond optimisée** : 1,7 Mo → 130 Ko (WebP redimensionné), non téléchargée sur mobile, avec un fondu à l'affichage.
+
+### Accessibilité
+
+Libellés et états ARIA sur les éléments interactifs (`aria-label`, `aria-pressed`, `aria-busy`), focus visible au clavier, respect de la préférence « réduire les animations » du système.
 
 ---
 
@@ -53,6 +89,21 @@ La sécurité des données ne repose pas sur l'interface, mais sur les **règles
 - **Validation des données côté serveur** : chaque produit est vérifié avant écriture (champs autorisés et obligatoires, types, longueur du nom, catégorie, prix et quantité positifs).
 - **Intégrité** : la date de création d'un produit ne peut pas être modifiée.
 
+Côté interface, les routes privées redirigent vers la connexion, et la page de connexion redirige un utilisateur déjà connecté vers le catalogue.
+
+---
+
+## ⚙️ Qualité et CI/CD
+
+Chaque modification passe par une **pull request** et un pipeline GitHub Actions ([`ci.yml`](./.github/workflows/ci.yml)) :
+
+1. **Lint** (ESLint), **vérification des types** (TypeScript) et **tests** (Vitest)
+2. **Build** de production, réalisé une seule fois puis réutilisé pour les déploiements
+3. **Déploiement de prévisualisation** : chaque pull request obtient sa propre URL temporaire, publiée en commentaire
+4. **Déploiement en production** automatique à chaque merge sur `main`
+
+Le dépôt suit le **GitHub Flow** (une branche courte par ticket) et la convention **Conventional Commits** (`feat`, `fix`, `refactor`…).
+
 ---
 
 ## 📖 Origine du projet
@@ -62,10 +113,12 @@ Ce projet est né lors de la formation **Développeur React — Vi-Dev**, où j'
 Je l'ai ensuite **repris et fait évoluer seul** :
 
 - Migration complète de **JavaScript vers TypeScript**
-- Ajout de l'**authentification** (inscription, connexion, réinitialisation du mot de passe)
+- Ajout de l'**authentification** (connexion, réinitialisation du mot de passe)
 - Nouveau **design responsive** avec **Tailwind CSS**
+- **Pagination Firestore** et **défilement infini**
 - Écriture des **règles de sécurité Firestore** (rôles, validation des données)
-- **Déploiement** sur Firebase Hosting
+- **Tests** unitaires et de composants (Vitest, React Testing Library)
+- **CI/CD** avec GitHub Actions et déploiement sur Firebase Hosting
 
 ---
 
@@ -94,6 +147,8 @@ cp .env.example .env
 npm run dev
 ```
 
+Pour accéder au catalogue, ton utilisateur doit être déclaré administrateur : crée un document dans la collection `admins` de Firestore, avec l'UID de l'utilisateur comme identifiant.
+
 ### Variables d'environnement
 
 ```env
@@ -110,34 +165,38 @@ VITE_FIREBASE_APP_ID=
 | Commande | Description |
 |---|---|
 | `npm run dev` | Lance le serveur de développement |
-| `npm run build` | Génère la version de production dans `dist/` |
+| `npm run build` | Vérifie les types et génère la version de production dans `dist/` |
 | `npm run preview` | Prévisualise la version de production en local |
 | `npm run lint` | Analyse le code avec ESLint |
+| `npm run typecheck` | Vérifie les types TypeScript |
+| `npm test` | Lance les tests en mode surveillance |
+| `npm run test:run` | Lance les tests une seule fois (utilisé par la CI) |
 
 ---
 
 ## ☁️ Déploiement
 
-L'application est hébergée sur **Firebase Hosting**.
+L'application est déployée **automatiquement** par GitHub Actions (voir la section *Qualité et CI/CD* ci-dessus).
+
+Les règles de sécurité Firestore se déploient à part, manuellement :
 
 ```bash
-npm run build
-firebase deploy --only hosting          # déployer l'application
-firebase deploy --only firestore:rules  # déployer les règles de sécurité
+firebase deploy --only firestore:rules
 ```
 
 ---
 
 ## 🗺️ Évolutions prévues
 
-- [ ] Tests unitaires et d'intégration (Vitest, React Testing Library)
-- [ ] Intégration continue et déploiement automatique (GitHub Actions)
-- [ ] Séparation en deux applications : **back-office administrateur** et **application client** de commande
+- [ ] **Tableau de bord** : chiffres clés du catalogue (produits par catégorie, épuisés, mis en avant)
+- [ ] **Codes promo** : création, dates de validité, activation
+- [ ] **Gestion des catégories** depuis l'interface
+- [ ] **Application client** de commande, séparée du back-office
 
 ---
 
 ## 👤 Auteur
 
-**[Loris LETIERCE]** — Développeur React junior, en recherche d'emploi
+**Loris LETIERCE** — Développeur React junior, en recherche d'emploi
 
 [LinkedIn](https://www.linkedin.com/in/loris-letierce-9863a1159) · [GitHub](https://github.com/lletierce) · [Email](mailto:letierce.lo@gmail.com)
