@@ -17,10 +17,20 @@
 
 /*  Couleurs et polices personnalisées */
 @theme {
+  /* --- Palette de marque (Crazee Burger) --- */
   --color-orange-primary: #ffa01b;
   --color-red-primary: #e25549;
   --color-green-success: #60bd4f;
   --font-amatic: "Amatic SC", "cursive";
-}
 
-/* ff9f1b */
+  /*
+   * --- Rôles (design system) ---
+   * Les composants utilisent ces noms (bg-primary, text-on-primary…) plutôt
+   * que des couleurs brutes : changer la teinte de l'app se fait ici, une fois.
+   * Contrastes vérifiés selon les recommandations WCAG (4,5:1 minimum pour un texte).
+   */
+  --color-primary: var(--color-orange-primary);   /* fond des actions principales et badges */
+  --color-primary-hover: #f59200;                 /* survol des actions principales */
+  --color-on-primary: #171717;                    /* texte sur primary : 8,8:1 (le blanc ne donne que 2:1) */
+  --color-primary-strong: #c2410c;                /* orange foncé : liens, icônes actives, contour de focus (4,8:1 sur fond clair) */
+}
