@@ -18,7 +18,7 @@ Un compte de démonstration est disponible :
 |---|---|
 | `demo@exemple.com` | `CrazeeBurger123*` |
 
-> Les données de démonstration sont réinitialisées régulièrement.
+> Tu peux tout modifier : le bouton **« 🧪 Mode démo · Réinitialiser »**, en bas à gauche de l'écran, remet le catalogue dans son état d'origine en un clic.
 
 ---
 
@@ -158,6 +158,7 @@ VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
+VITE_DEMO_MODE=
 ```
 
 ### Scripts disponibles
