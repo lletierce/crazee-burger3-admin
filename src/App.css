@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Open+Sans:wght@500&display=swap");
+/* Polices Google chargées dans index.html (plus rapide qu'un @import ici) */
 @import "tailwindcss";
 
 
