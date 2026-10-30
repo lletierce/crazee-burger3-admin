@@ -110,7 +110,7 @@ Le dépôt suit le **GitHub Flow** (une branche courte par ticket) et la convent
 
 Ce projet est né lors de la formation **Développeur React — Vi-Dev**, où j'ai réalisé une première version en JavaScript avec Firebase et Styled-components.
 
-Je l'ai ensuite **repris et fait évoluer seul** :
+Je l'ai ensuite **repris et fait évoluer seul** avec Claude :
 
 - Migration complète de **JavaScript vers TypeScript**
 - Ajout de l'**authentification** (connexion, réinitialisation du mot de passe)
