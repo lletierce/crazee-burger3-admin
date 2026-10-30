@@ -42,7 +42,7 @@ export default function DesktopNav({ userDisplayName, onLogout }: DesktopNavProp
                 <button
                     type="button"
                     onClick={onLogout}
-                    className="shrink-0 rounded-md bg-amber-400 px-4 py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-500"
+                    className="shrink-0 rounded-md border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-neutral-900"
                 >
                     Se déconnecter
                 </button>

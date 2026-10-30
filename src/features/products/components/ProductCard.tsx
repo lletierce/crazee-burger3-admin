@@ -28,7 +28,7 @@ export function ProductCard({ product, to, onDelete }: ProductCardProps) {
         )}
 
         {product.isPromoted && (
-          <span className="absolute left-2 top-2 rounded-full bg-amber-400 px-2 py-0.5 text-xs font-medium text-neutral-900">
+          <span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-on-primary">
             En avant
           </span>
         )}
@@ -70,7 +70,7 @@ export function ProductCard({ product, to, onDelete }: ProductCardProps) {
   );
 
   const cardClassName = `group flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white transition-all duration-200 ${
-    to ? 'hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-lg hover:shadow-amber-200/50' : ''
+    to ? 'hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-lg hover:shadow-primary/20' : ''
   }`;
 
   if (to) {

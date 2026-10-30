@@ -40,7 +40,7 @@ export default function LoginForm() {
                 placeholder="Email"
                 autoComplete="email"
                 maxLength={50}
-                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-strong"
             />
             <PasswordInput
                 value={password}
@@ -49,15 +49,15 @@ export default function LoginForm() {
                 placeholder="Mot de passe"
                 autoComplete="current-password"
                 maxLength={30}
-                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-strong"
             />
             <button
-                className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                className="bg-primary text-on-primary font-medium py-3 rounded-lg hover:bg-primary-hover transition disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled={loading}
                 type="submit">
                 {loading ? 'Connexion...' : 'Connexion'}
             </button>
-                <Link className="w-fit text-sm md:hover:underline text-[#f56a2c]" to="/recovery">
+                <Link className="w-fit text-sm md:hover:underline text-primary-strong" to="/recovery">
                     Vous avez oublié votre mot de passe ?
                 </Link>
             {/* <p className="text-gray-500 text-xs  flex justify-center">Plus d'options de connexion</p> */}

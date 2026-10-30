@@ -159,7 +159,7 @@ export function ProductPage() {
                   {(product.isPromoted || !product.isAvailable) && (
                     <div className="mb-3 flex flex-wrap gap-2">
                       {product.isPromoted && (
-                        <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-medium text-neutral-900">
+                        <span className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-on-primary">
                           En avant
                         </span>
                       )}

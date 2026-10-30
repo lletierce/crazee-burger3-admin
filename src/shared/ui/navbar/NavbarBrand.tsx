@@ -24,7 +24,7 @@ export default function NavbarBrand({ showName = true, onClick }: NavbarBrandPro
         <Link
             to="/produits"
             onClick={onClick}
-            className="flex shrink-0 items-center gap-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-primary"
+            className="flex shrink-0 items-center gap-2 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-strong"
         >
             <img
                 src={LOGO_SRC}

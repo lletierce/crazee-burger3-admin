@@ -46,7 +46,7 @@ export default function MinimalistActionBtn({
                 hover:text-neutral-900
                 focus:outline-none
                 focus-visible:ring-2
-                focus-visible:ring-orange-primary
+                focus-visible:ring-primary-strong
                 ${className}
             `}
         >

@@ -25,10 +25,10 @@ export default function RecoveryPasswordForm({ onSubmit, loading }: RecoveryPass
                 required
                 placeholder="Email"
                 maxLength={50}
-                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-strong"
             />
             <button
-                className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+                className="bg-primary text-on-primary font-medium py-3 rounded-lg hover:bg-primary-hover transition disabled:opacity-60 disabled:cursor-not-allowed"
                 type="submit"
                 disabled={loading}
             >

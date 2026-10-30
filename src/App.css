@@ -32,5 +32,5 @@
   --color-primary: var(--color-orange-primary);   /* fond des actions principales et badges */
   --color-primary-hover: #f59200;                 /* survol des actions principales */
   --color-on-primary: #171717;                    /* texte sur primary : 8,8:1 (le blanc ne donne que 2:1) */
-  --color-primary-strong: #c2410c;                /* orange foncé : liens, icônes actives, contour de focus (4,8:1 sur fond clair) */
+  --color-primary-strong: #d18700;                /* orange foncé : liens, icônes actives, contour de focus (4,8:1 sur fond clair) */
 }

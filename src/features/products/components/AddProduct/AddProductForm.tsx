@@ -210,7 +210,7 @@ export function AddProductForm({ onSuccess, onCancel }: AddProductFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-amber-400 px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-amber-500 disabled:opacity-50"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-hover disabled:opacity-50"
         >
           {isSubmitting ? 'Création...' : 'Créer le produit'}
         </button>

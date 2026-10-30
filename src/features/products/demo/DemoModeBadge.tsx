@@ -45,7 +45,7 @@ export function DemoModeBadge({ onReset }: DemoModeBadgeProps) {
   return (
     <>
       <div className="fixed bottom-4 left-4 z-40 flex items-center gap-1 rounded-full border border-neutral-200 bg-white/95 py-1 pl-3 pr-1 text-xs shadow-lg backdrop-blur transition-shadow hover:shadow-xl">
-        <LuFlaskConical size={14} aria-hidden="true" className="text-orange-primary" />
+        <LuFlaskConical size={14} aria-hidden="true" className="text-primary" />
         <span className="font-medium text-neutral-700">Mode démo</span>
         {/*
           Survol (souris uniquement : Tailwind 4 n'applique `hover:` que sur les
@@ -56,7 +56,7 @@ export function DemoModeBadge({ onReset }: DemoModeBadgeProps) {
         <button
           type="button"
           onClick={() => setIsConfirmOpen(true)}
-          className="group ml-1 flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-1 font-medium text-neutral-700 transition-colors hover:bg-orange-primary hover:text-neutral-900 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-primary"
+          className="group ml-1 flex items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-1 font-medium text-neutral-700 transition-colors hover:bg-primary hover:text-on-primary active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-strong"
         >
           <LuRotateCcw
             size={12}
@@ -89,7 +89,7 @@ export function DemoModeBadge({ onReset }: DemoModeBadgeProps) {
               type="button"
               onClick={handleConfirm}
               disabled={isResetting}
-              className="rounded-md bg-amber-400 px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-amber-500 disabled:opacity-50"
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-hover disabled:opacity-50"
             >
               {isResetting ? 'Réinitialisation...' : 'Réinitialiser'}
             </button>

@@ -42,9 +42,9 @@ export default function PasswordInput({ className = "", ...inputProps }: Passwor
                     transition-colors
                     focus:outline-none
                     focus-visible:ring-2
-                    focus-visible:ring-blue-500
+                    focus-visible:ring-primary-strong
                     ${isVisible
-                        ? "text-blue-600 hover:text-blue-700"
+                        ? "text-primary-strong hover:text-orange-800"
                         : "text-gray-400 hover:text-gray-600"}
                 `}
             >
