@@ -27,7 +27,8 @@ service cloud.firestore {
     }
 
     match /products/{productId} {
-      allow read: if isAdmin();
+      // Lecture publique : le catalogue est affiché par l'application client (crazee-burger), sans connexion. (certains champs devrait être masqué mais pour les besoins de la demo on accepte ici)
+      allow read: if true;
       allow create: if isAdmin() && isValidProduct(request.resource.data);
       allow update: if isAdmin() && isValidProduct(request.resource.data)
                     && request.resource.data.createdAt == resource.data.createdAt;
