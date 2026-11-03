@@ -85,7 +85,8 @@ Libellés et états ARIA sur les éléments interactifs (`aria-label`, `aria-pre
 La sécurité des données ne repose pas sur l'interface, mais sur les **règles de sécurité Firestore** ([`firestore.rules`](./firestore.rules)), versionnées dans ce dépôt :
 
 - **Accès refusé par défaut** : toute collection non déclarée est inaccessible.
-- **Gestion des rôles** : seuls les utilisateurs présents dans la collection `admins` peuvent lire et modifier les produits. Cette collection n'est modifiable que depuis la console Firebase.
+- **Lecture publique du catalogue** : les produits sont lisibles sans connexion, pour être affichés par l'application client [crazee-burger](https://github.com/lletierce/crazee-burger).
+- **Gestion des rôles** : seuls les utilisateurs présents dans la collection `admins` peuvent créer, modifier et supprimer des produits. Cette collection n'est modifiable que depuis la console Firebase.
 - **Validation des données côté serveur** : chaque produit est vérifié avant écriture (champs autorisés et obligatoires, types, longueur du nom, catégorie, prix et quantité positifs).
 - **Intégrité** : la date de création d'un produit ne peut pas être modifiée.
 
