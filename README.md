@@ -189,11 +189,10 @@ firebase deploy --only firestore:rules
 ---
 
 ## 🗺️ Évolutions prévues
-
+- [x] [**Application client**](https://github.com/lletierce/crazee-burger) de commande, séparée du back-office
 - [ ] **Tableau de bord** : chiffres clés du catalogue (produits par catégorie, épuisés, mis en avant)
 - [ ] **Codes promo** : création, dates de validité, activation
 - [ ] **Gestion des catégories** depuis l'interface
-- [ ] **Application client** de commande, séparée du back-office
 
 ---
 
